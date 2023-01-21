@@ -1,0 +1,40 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<xs:schema version="1.1"
+           xmlns="xades-demo"
+           targetNamespace="xades-demo"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+           elementFormDefault="qualified">
+    <xs:import namespace="http://www.w3.org/2000/09/xmldsig#" schemaLocation="xmldsig.xml"/>
+
+    <xs:element name="docToSign" type="DocumentToSign"/>
+
+    <xs:complexType name="DocumentToSign">
+        <xs:sequence>
+            <xs:element name="numericArgument" type="xs:integer">
+                <xs:annotation>
+                    <xs:documentation>Mandatory argument holding integer value</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="stringArgument" type="xs:string" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Argument holding string value</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="timeArgument" type="xs:dateTime" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Some argument holding time value</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element ref="ds:Signature"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:attribute name="id">
+        <xs:simpleType>
+            <xs:restriction base="xs:ID">
+                <xs:pattern value="signedData"/>
+            </xs:restriction>
+        </xs:simpleType>
+    </xs:attribute>
+</xs:schema>
