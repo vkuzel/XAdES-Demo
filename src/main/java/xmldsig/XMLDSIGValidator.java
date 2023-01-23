@@ -2,7 +2,6 @@ package xmldsig;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 import javax.xml.crypto.*;
 import javax.xml.crypto.dsig.*;
@@ -10,10 +9,6 @@ import javax.xml.crypto.dsig.dom.DOMValidateContext;
 import javax.xml.crypto.dsig.keyinfo.KeyInfo;
 import javax.xml.crypto.dsig.keyinfo.KeyValue;
 import javax.xml.crypto.dsig.keyinfo.X509Data;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
-import java.io.InputStream;
 import java.security.KeyException;
 import java.security.PublicKey;
 import java.security.cert.Certificate;
@@ -22,13 +17,8 @@ import java.util.List;
 
 public class XMLDSIGValidator {
 
-    public void validate(InputStream documentStream) throws XMLDSIGValidationException {
+    public void validate(Document doc) throws XMLDSIGValidationException {
         try {
-            // Instantiate the document to be validated
-            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-            dbf.setNamespaceAware(true);
-            Document doc = dbf.newDocumentBuilder().parse(documentStream);
-
             // Find Signature element
             NodeList nl = doc.getElementsByTagNameNS(XMLSignature.XMLNS, "Signature");
             if (nl.getLength() == 0) {
@@ -64,8 +54,7 @@ public class XMLDSIGValidator {
             } else {
                 System.out.println("Signature passed core validation");
             }
-        } catch (MarshalException | IOException | ParserConfigurationException | XMLSignatureException |
-                 SAXException e) {
+        } catch (MarshalException | XMLSignatureException e) {
             throw new XMLDSIGValidationException(e);
         }
     }
