@@ -63,7 +63,8 @@ public class XMLDSIGSigner {
 
             List<Transform> transforms = List.of(sigTransform, canTransform);
 
-            Reference referenceDoc = xmlSignatureFactory.newReference("#document-id", digestMethod, transforms, null, null);
+            // Empty URI points to the root element. Otherwise, the URI would have to point to a signed element.
+            Reference referenceDoc = xmlSignatureFactory.newReference("", digestMethod, transforms, null, null);
 
             List<Reference> references = List.of(referenceDoc);
 
@@ -75,10 +76,6 @@ public class XMLDSIGSigner {
 
             XMLSignature xmlSignature = xmlSignatureFactory.newXMLSignature(signedInfo, keyInfo, null, null, null);
             Element rootNode = document.getDocumentElement();
-
-            // The ID attribute is special because of its type and has to be marked as such. Otherwise, the element won't be found & signing fails!
-            rootNode.setAttribute("id", "document-id");
-            rootNode.setIdAttribute("id", true);
 
             DOMSignContext domSignContext = new DOMSignContext(privateKey, rootNode);
 
