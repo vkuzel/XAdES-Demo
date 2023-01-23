@@ -1,6 +1,5 @@
 package xmldsig;
 
-import org.apache.jcp.xml.dsig.internal.dom.XMLDSigRI;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -14,6 +13,7 @@ import javax.xml.crypto.dsig.spec.C14NMethodParameterSpec;
 import javax.xml.crypto.dsig.spec.TransformParameterSpec;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.util.List;
@@ -54,7 +54,7 @@ public class XMLDSIGSigner {
      */
     public Document signEnveloped(Document document) {
         try {
-            XMLSignatureFactory xmlSignatureFactory = XMLSignatureFactory.getInstance("DOM", new XMLDSigRI());
+            XMLSignatureFactory xmlSignatureFactory = XMLSignatureFactory.getInstance("DOM", "XMLDSig");
             CanonicalizationMethod c14nMethod = xmlSignatureFactory.newCanonicalizationMethod(CAN_ALGORITHM, (C14NMethodParameterSpec) null);
             DigestMethod digestMethod = xmlSignatureFactory.newDigestMethod(DIG_ALGORITHM, null);
             SignatureMethod signMethod = xmlSignatureFactory.newSignatureMethod(SIG_ALGORITHM, null);
@@ -82,7 +82,8 @@ public class XMLDSIGSigner {
             xmlSignature.sign(domSignContext);
 
             return document;
-        } catch (MarshalException | InvalidAlgorithmParameterException | NoSuchAlgorithmException | XMLSignatureException e) {
+        } catch (MarshalException | InvalidAlgorithmParameterException | NoSuchAlgorithmException |
+                 XMLSignatureException | NoSuchProviderException e) {
             throw new RuntimeException(e);
         }
     }
