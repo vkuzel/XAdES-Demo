@@ -1,7 +1,11 @@
 <?xml version='1.0' encoding='UTF-8'?>
+<!--
+The namespace has to be an absolute URL. Otherwise, the "Element has a relative
+namespace" error occurs.
+-->
 <xs:schema version="1.1"
-           xmlns="xades-demo"
-           targetNamespace="xades-demo"
+           xmlns="https://vkuzel.com/xades-demo"
+           targetNamespace="https://vkuzel.com/xades-demo"
            xmlns:xs="http://www.w3.org/2001/XMLSchema"
            xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
            elementFormDefault="qualified">
