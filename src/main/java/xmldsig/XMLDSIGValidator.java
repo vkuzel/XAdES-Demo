@@ -14,7 +14,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.Key;
 import java.security.KeyException;
 import java.security.PublicKey;
 import java.security.cert.Certificate;
@@ -100,14 +99,14 @@ public class XMLDSIGValidator {
                     }
                     // make sure algorithm is compatible with method
                     if (algEquals(sm.getAlgorithm(), pk.getAlgorithm())) {
-                        return new SimpleKeySelectorResult(pk);
+                        return result(pk);
                     }
                 } else if (xmlStructure instanceof X509Data x509Data) {
                     List<?> x509DataContent = x509Data.getContent();
                     for (Object x509Item : x509DataContent) {
                         if (x509Item instanceof Certificate certificate) {
                             PublicKey pk = certificate.getPublicKey();
-                            return new SimpleKeySelectorResult(pk);
+                            return result(pk);
                         }
                     }
                 }
@@ -119,19 +118,14 @@ public class XMLDSIGValidator {
             if (algName.equalsIgnoreCase("DSA") &&
                     algURI.equalsIgnoreCase("http://www.w3.org/2009/xmldsig11#dsa-sha256")) {
                 return true;
-            } else if (algName.equalsIgnoreCase("RSA") &&
-                    algURI.equalsIgnoreCase("http://www.w3.org/2001/04/xmldsig-more#rsa-sha256")) {
-                return true;
             } else {
-                return false;
+                return algName.equalsIgnoreCase("RSA") &&
+                        algURI.equalsIgnoreCase("http://www.w3.org/2001/04/xmldsig-more#rsa-sha256");
             }
         }
-    }
 
-    private record SimpleKeySelectorResult(PublicKey pk) implements KeySelectorResult {
-
-        public Key getKey() {
-            return pk;
+        private KeySelectorResult result(PublicKey publicKey) {
+            return () -> publicKey;
         }
     }
 
