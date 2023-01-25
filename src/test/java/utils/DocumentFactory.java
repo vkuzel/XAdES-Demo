@@ -15,14 +15,19 @@ import java.time.ZonedDateTime;
 import java.util.GregorianCalendar;
 
 import static document.DocumentTransformer.fromBytes;
+import static document.DocumentTransformer.toDocument;
 import static java.math.BigInteger.ONE;
 import static java.util.Objects.requireNonNull;
 
-public class DocumentUtils {
+public class DocumentFactory {
 
     public static final BigInteger NUMERIC_VALUE = ONE;
     public static final String STRING_VALUE = "string-value";
     public static final XMLGregorianCalendar TIME_VALUE = xmlGregorianCalendar("2000-01-01T01:01:01Z");
+
+    public static Document createDocumentToSign() {
+        return toDocument(createJaxbElementToSign());
+    }
 
     public static JAXBElement<DocumentToSign> createJaxbElementToSign() {
         ObjectFactory objectFactory = new ObjectFactory();
@@ -34,7 +39,7 @@ public class DocumentUtils {
     }
 
     public static Document createXmlDigSignedDocument() {
-        try (InputStream inputStream = DocumentUtils.class.getResourceAsStream("/xmldsig/signed-document.xml")) {
+        try (InputStream inputStream = DocumentFactory.class.getResourceAsStream("/xmldsig/signed-document.xml")) {
             byte[] content = requireNonNull(inputStream).readAllBytes();
             return fromBytes(content);
         } catch (IOException e) {

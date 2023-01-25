@@ -4,7 +4,8 @@ import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import xmldsig.XMLDSIGValidator.XMLDSIGValidationException;
 
-import static utils.DocumentUtils.createXmlDigSignedDocument;
+import static document.DocumentTransformer.toPrettyString;
+import static utils.DocumentFactory.createXmlDigSignedDocument;
 
 class XMLDSIGValidatorTest {
 
@@ -12,6 +13,7 @@ class XMLDSIGValidatorTest {
     void validate() throws XMLDSIGValidationException {
         XMLDSIGValidator validator = new XMLDSIGValidator();
         Document signedDocument = createXmlDigSignedDocument();
+        System.out.printf("Doc: " + toPrettyString(signedDocument));
 
         validator.validate(signedDocument);
     }

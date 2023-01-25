@@ -31,7 +31,7 @@ public class KeyUtils {
     }
 
     private static KeyStore loadKeyStore() {
-        try (InputStream keyStoreStream = KeyUtils.class.getResourceAsStream("/xmldsig/keystore.jks")) {
+        try (InputStream keyStoreStream = KeyUtils.class.getResourceAsStream("/keystore.jks")) {
             KeyStore keyStore = KeyStore.getInstance("JKS");
             keyStore.load(keyStoreStream, "password".toCharArray());
             return keyStore;
