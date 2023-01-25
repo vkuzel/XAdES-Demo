@@ -8,6 +8,7 @@ import javax.xml.bind.JAXBElement;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 
+import static document.DocumentTransformer.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static utils.DocumentUtils.*;
@@ -21,14 +22,13 @@ class XMLDSIGSignerTest {
         Certificate certificate = getCertificate();
         PrivateKey privateKey = getPrivateKey();
         XMLDSIGSigner signer = new XMLDSIGSigner(certificate, privateKey);
-        JAXBElement<DocumentToSign> jaxbElement = createDocumentToSign();
-        Document document = marshal(jaxbElement);
-        System.out.printf("*** Document before signing:%n%s%n%n", pretty(document));
+        Document document = toDocument(createJaxbElementToSign());
+        System.out.printf("*** Document before signing:%n%s%n%n", toPrettyString(document));
 
         Document signed = signer.signEnveloped(document);
 
-        System.out.printf("*** Document after signing:%n%s%n%n", pretty(signed));
-        JAXBElement<DocumentToSign> signedJaxbElement = unmarshal(signed, DocumentToSign.class);
+        System.out.printf("*** Document after signing:%n%s%n%n", toPrettyString(signed));
+        JAXBElement<DocumentToSign> signedJaxbElement = fromDocument(signed, DocumentToSign.class);
         assertNotNull(signedJaxbElement.getValue());
         DocumentToSign signedDocument = signedJaxbElement.getValue();
         assertEquals(NUMERIC_VALUE, signedDocument.getNumericArgument());
