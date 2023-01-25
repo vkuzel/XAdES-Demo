@@ -17,10 +17,10 @@ import java.util.List;
 
 public class XMLDSIGValidator {
 
-    public void validate(Document doc) throws XMLDSIGValidationException {
+    public void validate(Document document) throws XMLDSIGValidationException {
         try {
             // Find Signature element
-            NodeList nl = doc.getElementsByTagNameNS(XMLSignature.XMLNS, "Signature");
+            NodeList nl = document.getElementsByTagNameNS(XMLSignature.XMLNS, "Signature");
             if (nl.getLength() == 0) {
                 throw new XMLDSIGValidationException("Cannot find Signature element");
             }
