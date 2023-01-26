@@ -1,6 +1,5 @@
 package utils;
 
-import document.DocumentTransformer;
 import https.vkuzel_com.xades_demo.DocumentToSign;
 import https.vkuzel_com.xades_demo.ObjectFactory;
 import org.w3c.dom.Document;
@@ -40,18 +39,21 @@ public class DocumentFactory {
     }
 
     public static Document createXmlDigSignedDocument() {
-        try (InputStream inputStream = DocumentFactory.class.getResourceAsStream("/xmldsig/signed-document.xml")) {
-            byte[] content = requireNonNull(inputStream).readAllBytes();
-            return fromBytes(content);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        return loadDocumentFromResource("/xmldsig/signed-document.xml");
+    }
+
+    public static Document createXmlDigSignedChangedDocument() {
+        return loadDocumentFromResource("/xmldsig/signed-changed-document.xml");
     }
 
     public static Document createXadesSignedDocument() {
-        try (InputStream inputStream = DocumentFactory.class.getResourceAsStream("/xades/signed-document.xml")) {
+        return loadDocumentFromResource("/xades/signed-document.xml");
+    }
+
+    private static Document loadDocumentFromResource(String name) {
+        try (InputStream inputStream = DocumentFactory.class.getResourceAsStream(name)) {
             byte[] content = requireNonNull(inputStream).readAllBytes();
-            return DocumentTransformer.fromBytes(content);
+            return fromBytes(content);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
