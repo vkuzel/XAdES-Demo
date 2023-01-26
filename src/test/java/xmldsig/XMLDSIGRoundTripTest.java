@@ -12,8 +12,8 @@ import java.security.cert.Certificate;
 
 import static document.DocumentTransformer.*;
 import static utils.DocumentFactory.createDocumentToSign;
-import static utils.KeyUtils.getCertificate;
-import static utils.KeyUtils.getPrivateKey;
+import static utils.KeyFactory.getCertificate;
+import static utils.KeyFactory.getPrivateKey;
 
 public class XMLDSIGRoundTripTest {
 

@@ -12,8 +12,8 @@ import static document.DocumentTransformer.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static utils.DocumentFactory.*;
-import static utils.KeyUtils.getCertificate;
-import static utils.KeyUtils.getPrivateKey;
+import static utils.KeyFactory.getCertificate;
+import static utils.KeyFactory.getPrivateKey;
 
 class XMLDSIGSignerTest {
 
