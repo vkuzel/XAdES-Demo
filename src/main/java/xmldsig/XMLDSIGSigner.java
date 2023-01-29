@@ -69,8 +69,7 @@ public class XMLDSIGSigner {
             KeyInfo keyInfo = createKeyInfo(xmlSignatureFactory);
             XMLSignature xmlSignature = xmlSignatureFactory.newXMLSignature(signedInfo, keyInfo, null, null, null);
 
-            Element rootNode = document.getDocumentElement();
-            DOMSignContext domSignContext = new DOMSignContext(privateKey, rootNode);
+            DOMSignContext domSignContext = createDomSignContext(document);
             xmlSignature.sign(domSignContext);
 
             return document;
@@ -104,5 +103,26 @@ public class XMLDSIGSigner {
         KeyInfoFactory keyInfoFactory = xmlSignatureFactory.getKeyInfoFactory();
         X509Data x509Data = keyInfoFactory.newX509Data(List.of(certificate));
         return keyInfoFactory.newKeyInfo(List.of(x509Data));
+    }
+
+    private DOMSignContext createDomSignContext(Document document) {
+        Element rootNode = document.getDocumentElement();
+        DOMSignContext domSignContext = new DOMSignContext(privateKey, rootNode);
+        // In our example we want to specify XML Signature namespace on the
+        // root element of the document. E.g.:
+        //
+        // <docToSign ... xmlns:ns2="http://www.w3.org/2000/09/xmldsig#">
+        //   <ns2:Signature>
+        //
+        // So, to prefix the signature element with name spaces, we have to
+        // specify the namespace via `setDefaultNamespacePrefix()` method.
+        //
+        // If no default namespace is specified, then the signing algorithm
+        // adds namespace to the signature element itself. E.g.:
+        //
+        // <docToSign ...>
+        //   <Signature xmlns="http://www.w3.org/2000/09/xmldsig#">
+        domSignContext.setDefaultNamespacePrefix("ns2");
+        return domSignContext;
     }
 }
