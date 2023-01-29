@@ -15,14 +15,14 @@ import java.security.cert.Certificate;
 import java.util.Iterator;
 import java.util.List;
 
-public class XMLDSIGValidator {
+public class XMLDSigValidator {
 
-    public void validate(Document document) throws XMLDSIGValidationException {
+    public void validate(Document document) throws XMLDSigValidationException {
         try {
             // Find Signature element
             NodeList nl = document.getElementsByTagNameNS(XMLSignature.XMLNS, "Signature");
             if (nl.getLength() == 0) {
-                throw new XMLDSIGValidationException("Cannot find Signature element");
+                throw new XMLDSigValidationException("Cannot find Signature element");
             }
 
             // Create a DOM XMLSignatureFactory that will be used to unmarshal the
@@ -50,12 +50,12 @@ public class XMLDSIGValidator {
                     boolean refValid = i.next().validate(valContext);
                     builder.append("* ref[").append(j).append("] validity status: ").append(refValid).append('\n');
                 }
-                throw new XMLDSIGValidationException(builder.toString());
+                throw new XMLDSigValidationException(builder.toString());
             } else {
                 System.out.println("Signature passed core validation");
             }
         } catch (MarshalException | XMLSignatureException e) {
-            throw new XMLDSIGValidationException(e);
+            throw new XMLDSigValidationException(e);
         }
     }
 
@@ -118,13 +118,13 @@ public class XMLDSIGValidator {
         }
     }
 
-    public static class XMLDSIGValidationException extends Exception {
+    public static class XMLDSigValidationException extends Exception {
 
-        public XMLDSIGValidationException(String message) {
+        public XMLDSigValidationException(String message) {
             super(message);
         }
 
-        public XMLDSIGValidationException(Throwable cause) {
+        public XMLDSigValidationException(Throwable cause) {
             super(cause);
         }
     }

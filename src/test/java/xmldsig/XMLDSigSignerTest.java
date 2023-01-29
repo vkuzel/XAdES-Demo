@@ -15,13 +15,13 @@ import static utils.DocumentFactory.*;
 import static utils.KeyFactory.getCertificate;
 import static utils.KeyFactory.getPrivateKey;
 
-class XMLDSIGSignerTest {
+class XMLDSigSignerTest {
 
     @Test
     void signEnveloped() {
         Certificate certificate = getCertificate();
         PrivateKey privateKey = getPrivateKey();
-        XMLDSIGSigner signer = new XMLDSIGSigner(certificate, privateKey);
+        XMLDSigSigner signer = new XMLDSigSigner(certificate, privateKey);
         Document document = toDocument(createJaxbElementToSign());
         System.out.printf("*** Document before signing:%n%s%n%n", toPrettyString(document));
 

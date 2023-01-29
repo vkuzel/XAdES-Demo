@@ -4,7 +4,7 @@ import document.DocumentTransformer;
 import https.vkuzel_com.xades_demo.DocumentToSign;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
-import xmldsig.XMLDSIGValidator.XMLDSIGValidationException;
+import xmldsig.XMLDSigValidator.XMLDSigValidationException;
 
 import javax.xml.bind.JAXBElement;
 import java.security.PrivateKey;
@@ -15,15 +15,15 @@ import static utils.DocumentFactory.createDocumentToSign;
 import static utils.KeyFactory.getCertificate;
 import static utils.KeyFactory.getPrivateKey;
 
-public class XMLDSIGRoundTripTest {
+public class XMLDSigRoundTripTest {
 
     private final Certificate certificate = getCertificate();
     private final PrivateKey privateKey = getPrivateKey();
-    private final XMLDSIGSigner signer = new XMLDSIGSigner(certificate, privateKey);
-    private final XMLDSIGValidator validator = new XMLDSIGValidator();
+    private final XMLDSigSigner signer = new XMLDSigSigner(certificate, privateKey);
+    private final XMLDSigValidator validator = new XMLDSigValidator();
 
     @Test
-    void roundTripToDocument() throws XMLDSIGValidationException {
+    void roundTripToDocument() throws XMLDSigValidationException {
         Document document = createDocumentToSign();
         System.out.printf("*** Document before signing:%n%s%n%n", toPrettyString(document));
 
@@ -35,7 +35,7 @@ public class XMLDSIGRoundTripTest {
     }
 
     @Test
-    void roundTripToBytes() throws XMLDSIGValidationException {
+    void roundTripToBytes() throws XMLDSigValidationException {
         Document document = createDocumentToSign();
         System.out.printf("*** Document before signing:%n%s%n%n", toPrettyString(document));
 
@@ -49,7 +49,7 @@ public class XMLDSIGRoundTripTest {
     }
 
     @Test
-    void roundTripToString() throws XMLDSIGValidationException {
+    void roundTripToString() throws XMLDSigValidationException {
         Document document = createDocumentToSign();
         System.out.printf("*** Document before signing:%n%s%n%n", toPrettyString(document));
 
@@ -63,7 +63,7 @@ public class XMLDSIGRoundTripTest {
     }
 
     @Test
-    void roundTripToJaxbElement() throws XMLDSIGValidationException {
+    void roundTripToJaxbElement() throws XMLDSigValidationException {
         Document document = createDocumentToSign();
         System.out.printf("*** Document before signing:%n%s%n%n", toPrettyString(document));
 

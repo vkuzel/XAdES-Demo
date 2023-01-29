@@ -20,7 +20,7 @@ import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.util.List;
 
-public class XMLDSIGSigner {
+public class XMLDSigSigner {
 
     // Removes "enveloped signature" from a document, so the signature element itself is not digested
     private static final String TRANSFORM_ALGORITHM = "http://www.w3.org/2000/09/xmldsig#enveloped-signature";
@@ -37,7 +37,7 @@ public class XMLDSIGSigner {
     private final Certificate certificate;
     private final PrivateKey privateKey;
 
-    public XMLDSIGSigner(Certificate certificate, PrivateKey privateKey) {
+    public XMLDSigSigner(Certificate certificate, PrivateKey privateKey) {
         this.certificate = certificate;
         this.privateKey = privateKey;
     }

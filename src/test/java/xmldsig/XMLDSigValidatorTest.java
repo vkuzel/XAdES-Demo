@@ -2,19 +2,19 @@ package xmldsig;
 
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
-import xmldsig.XMLDSIGValidator.XMLDSIGValidationException;
+import xmldsig.XMLDSigValidator.XMLDSigValidationException;
 
 import static document.DocumentTransformer.toPrettyString;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static utils.DocumentFactory.createXmlDigSignedChangedDocument;
 import static utils.DocumentFactory.createXmlDigSignedDocument;
 
-class XMLDSIGValidatorTest {
+class XMLDSigValidatorTest {
 
-    private final XMLDSIGValidator validator = new XMLDSIGValidator();
+    private final XMLDSigValidator validator = new XMLDSigValidator();
 
     @Test
-    void validate() throws XMLDSIGValidationException {
+    void validate() throws XMLDSigValidationException {
         Document signedDocument = createXmlDigSignedDocument();
         System.out.printf("Doc: " + toPrettyString(signedDocument));
 
@@ -26,6 +26,6 @@ class XMLDSIGValidatorTest {
         Document signedDocument = createXmlDigSignedChangedDocument();
         System.out.printf("Doc: " + toPrettyString(signedDocument));
 
-        assertThrows(XMLDSIGValidationException.class, () -> validator.validate(signedDocument));
+        assertThrows(XMLDSigValidationException.class, () -> validator.validate(signedDocument));
     }
 }
