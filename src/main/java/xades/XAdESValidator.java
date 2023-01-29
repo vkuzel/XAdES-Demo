@@ -17,18 +17,17 @@ import java.security.KeyException;
 import java.security.PublicKey;
 import java.security.cert.Certificate;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
+
+import static java.util.Objects.requireNonNull;
 
 public class XAdESValidator {
 
     public void validate(Document document) throws XAdESValidationException {
-        NodeList qualifyingPropertiesNodeList = document.getElementsByTagName("QualifyingProperties");
-        nodeStream(qualifyingPropertiesNodeList)
-                .filter(Objects::nonNull)
-                .map(e -> (Element) e)
-                .forEach(e -> e.setIdAttribute("Id", true));
+        // When document is deserialized from an XML file, the SignerProperties
+        // element ID attribute is not properly marked, which means reference
+        // URL to the signed properties does not work. Manual marking it, fixes
+        // the issue.
+        markSignerPropertiesId(document);
 
         NodeList nodeListSignature = document.getElementsByTagNameNS(XMLSignature.XMLNS, "Signature");
         if (nodeListSignature.getLength() == 0) throw new XAdESValidationException("No signature found!");
@@ -53,10 +52,15 @@ public class XAdESValidator {
         }
     }
 
-    private Stream<Node> nodeStream(NodeList nodeList) {
-        if (nodeList == null) return Stream.of();
-        return IntStream.range(0, nodeList.getLength())
-                .mapToObj(nodeList::item);
+    private void markSignerPropertiesId(Document document) {
+        NodeList signedPropertiesNodeList = document.getElementsByTagName("SignedProperties");
+        requireNonNull(signedPropertiesNodeList);
+        for (int i = 0; i < signedPropertiesNodeList.getLength(); i++) {
+            Node node = signedPropertiesNodeList.item(i);
+            if (node instanceof Element element) {
+                element.setIdAttribute("Id", true);
+            }
+        }
     }
 
     private static class KeyValueKeySelector extends KeySelector {

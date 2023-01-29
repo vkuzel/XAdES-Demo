@@ -53,11 +53,11 @@ public class XAdESSigner {
     public Document signEnveloped(Document document) {
         try {
             String signatureId = "signature-" + UUID.randomUUID();
-            String qualifyingPropertiesId = "ql-" + UUID.randomUUID();
+            String signedPropertiesId = "sp-" + UUID.randomUUID();
 
-            SignedInfo signedInfo = createSignedInfo(qualifyingPropertiesId);
+            SignedInfo signedInfo = createSignedInfo(signedPropertiesId);
             KeyInfo keyInfo = createKeyInfo();
-            XMLObject qualifyingProperties = createQualifyingProperties(document, qualifyingPropertiesId, signatureId);
+            XMLObject qualifyingProperties = createQualifyingProperties(document, signedPropertiesId, signatureId);
 
             XMLSignature xmlSignature = xmlSignatureFactory.newXMLSignature(signedInfo, keyInfo, List.of(qualifyingProperties), signatureId, null);
 
@@ -71,13 +71,13 @@ public class XAdESSigner {
         }
     }
 
-    private SignedInfo createSignedInfo(String qualifyingPropertiesId) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
+    private SignedInfo createSignedInfo(String signedPropertiesId) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
         CanonicalizationMethod c14nMethod = xmlSignatureFactory.newCanonicalizationMethod(C14N_CANONICALIZATION_ALGORITHM, EMPTY_C14N_PARAMS);
         SignatureMethod signMethod = xmlSignatureFactory.newSignatureMethod(RSA_SHA256_SIGN_ALGORITHM, EMPTY_SIGN_PARAMS);
 
         List<Reference> references = List.of(
                 createSignedDocumentReference(),
-                createQualifyingPropertiesReference(qualifyingPropertiesId)
+                createSignedPropertiesReference(signedPropertiesId)
         );
 
         return xmlSignatureFactory.newSignedInfo(c14nMethod, signMethod, references);
@@ -107,18 +107,18 @@ public class XAdESSigner {
     }
 
     /**
-     * This reference points to the XAdES qualifying properties data.
+     * This reference points to the XAdES signed properties.
      * <p>
      * The properties have to be digested / signed as well to prevent them from
      * changing.
      */
-    private Reference createQualifyingPropertiesReference(String qualifyingPropertiesId) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException {
+    private Reference createSignedPropertiesReference(String signedPropertiesId) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException {
         DigestMethod digestMethod = xmlSignatureFactory.newDigestMethod(SHA256_DIGEST_ALGORITHM, EMPTY_DIGEST_PARAMS);
         Transform c14nWithCommentsTransform = xmlSignatureFactory.newTransform(C14N_CANONICALIZATION_ALGORITHM, EMPTY_TRANSFORM_PARAMS);
 
         List<Transform> transforms = List.of(c14nWithCommentsTransform);
 
-        return xmlSignatureFactory.newReference("#" + qualifyingPropertiesId, digestMethod, transforms, null, null);
+        return xmlSignatureFactory.newReference("#" + signedPropertiesId, digestMethod, transforms, null, null);
     }
 
     private KeyInfo createKeyInfo() {
@@ -127,21 +127,21 @@ public class XAdESSigner {
         return keyInfoFactory.newKeyInfo(List.of(x509Data));
     }
 
-    private XMLObject createQualifyingProperties(Document document, String qualifyingPropertiesId, String signatureId) {
-        Element qualifyingPropertiesElement = createQualifyingPropertiesAttrs(document, qualifyingPropertiesId, signatureId);
+    private XMLObject createQualifyingProperties(Document document, String signedPropertiesId, String signatureId) {
+        Element qualifyingPropertiesElement = createQualifyingPropertiesAttrs(document, signedPropertiesId, signatureId);
         DOMStructure qualifyingPropertiesObject = new DOMStructure(qualifyingPropertiesElement);
         return xmlSignatureFactory.newXMLObject(singletonList(qualifyingPropertiesObject), null, null, null);
     }
 
-    private Element createQualifyingPropertiesAttrs(Document document, String qualifyingPropertiesId, String signatureId) {
+    private Element createQualifyingPropertiesAttrs(Document document, String signedPropertiesId, String signatureId) {
         String signingTime = ISO_OFFSET_DATE_TIME.format(now());
 
         Element qualifyingPropertiesElement = document.createElement("QualifyingProperties");
-        qualifyingPropertiesElement.setAttribute("Id", qualifyingPropertiesId);
-        qualifyingPropertiesElement.setIdAttribute("Id", true);
         qualifyingPropertiesElement.setAttribute("Target", "#" + signatureId);
 
         Element signedPropertiesElement = document.createElement("SignedProperties");
+        signedPropertiesElement.setAttribute("Id", signedPropertiesId);
+        signedPropertiesElement.setIdAttribute("Id", true);
         Element signedSignaturePropertiesElement = document.createElement("SignedSignatureProperties");
         Element signingTimeElement = document.createElement("SigningTime");
         signingTimeElement.setTextContent(signingTime);
