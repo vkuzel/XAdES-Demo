@@ -1,10 +1,14 @@
 package xmldsig;
 
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import javax.xml.crypto.*;
-import javax.xml.crypto.dsig.*;
+import javax.xml.crypto.dsig.Reference;
+import javax.xml.crypto.dsig.XMLSignature;
+import javax.xml.crypto.dsig.XMLSignatureException;
+import javax.xml.crypto.dsig.XMLSignatureFactory;
 import javax.xml.crypto.dsig.dom.DOMValidateContext;
 import javax.xml.crypto.dsig.keyinfo.KeyInfo;
 import javax.xml.crypto.dsig.keyinfo.KeyValue;
@@ -17,36 +21,31 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static javax.xml.crypto.dsig.XMLSignature.XMLNS;
+
 public class XMLDSigValidator {
 
     public void validate(Document document) throws XMLDSigValidationException {
         try {
             // Find Signature element
-            NodeList nl = document.getElementsByTagNameNS(XMLSignature.XMLNS, "Signature");
-            if (nl.getLength() == 0) {
-                throw new XMLDSigValidationException("Cannot find Signature element");
-            }
-
-            // Create a DOM XMLSignatureFactory that will be used to unmarshal the
-            // document containing the XMLSignature
-            XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM");
+            NodeList signatureNodes = document.getElementsByTagNameNS(XMLNS, "Signature");
+            if (signatureNodes.getLength() != 1) throw new XMLDSigValidationException("Cannot retrieve Signature");
+            Node signatureNode = signatureNodes.item(0);
 
             // Create a DOMValidateContext and specify a KeyValue KeySelector
             // and document context
-            DOMValidateContext validateContext = new DOMValidateContext(new KeyValueKeySelector(), nl.item(0));
+            DOMValidateContext validateContext = new DOMValidateContext(new KeyValueKeySelector(), signatureNode);
 
-            // unmarshal the XMLSignature
-            XMLSignature signature = fac.unmarshalXMLSignature(validateContext);
+            // Create a DOM XMLSignatureFactory that will be used to unmarshal the
+            // document containing the XMLSignature
+            XMLSignatureFactory xmlSignatureFactory = XMLSignatureFactory.getInstance("DOM");
 
-            // Validate the generated XMLSignature
-            boolean coreValidity = signature.validate(validateContext);
+            XMLSignature signature = xmlSignatureFactory.unmarshalXMLSignature(validateContext);
 
-            // Check core validation status
-            if (!coreValidity) {
+            // Validate XMLSignature
+            if (!signature.validate(validateContext)) {
                 String msg = createXMLDSigValidationErrorMessage(validateContext, signature);
                 throw new XMLDSigValidationException(msg);
-            } else {
-                System.out.println("Signature passed core validation");
             }
         } catch (MarshalException | XMLSignatureException e) {
             throw new XMLDSigValidationException(e);
@@ -83,53 +82,61 @@ public class XMLDSigValidator {
     private static class KeyValueKeySelector extends KeySelector {
         public KeySelectorResult select(
                 KeyInfo keyInfo,
-                KeySelector.Purpose purpose,
+                Purpose purpose,
                 AlgorithmMethod method,
                 XMLCryptoContext context
         ) throws KeySelectorException {
             if (keyInfo == null) {
                 throw new KeySelectorException("Null KeyInfo object!");
             }
-            SignatureMethod sm = (SignatureMethod) method;
-            List<XMLStructure> list = keyInfo.getContent();
 
-            for (XMLStructure xmlStructure : list) {
-                if (xmlStructure instanceof KeyValue keyValue) {
-                    PublicKey pk;
-                    try {
-                        pk = keyValue.getPublicKey();
-                    } catch (KeyException ke) {
-                        throw new KeySelectorException(ke);
-                    }
-                    // make sure algorithm is compatible with method
-                    if (algEquals(sm.getAlgorithm(), pk.getAlgorithm())) {
-                        return result(pk);
-                    }
-                } else if (xmlStructure instanceof X509Data x509Data) {
-                    List<?> x509DataContent = x509Data.getContent();
-                    for (Object x509Item : x509DataContent) {
-                        if (x509Item instanceof Certificate certificate) {
-                            PublicKey pk = certificate.getPublicKey();
-                            return result(pk);
-                        }
-                    }
+            for (XMLStructure keyInfoItem : keyInfo.getContent()) {
+                PublicKey publicKey = findPublicKey(keyInfoItem);
+                if (publicKey == null) continue;
+                String publicKeyAlgoUri = algorithmNameToUri(publicKey.getAlgorithm());
+                String methodAlgoUri = method.getAlgorithm();
+                if (publicKeyAlgoUri.equalsIgnoreCase(methodAlgoUri)) {
+                    return () -> publicKey;
                 }
             }
+
             throw new KeySelectorException("No KeyValue element found!");
         }
 
-        static boolean algEquals(String algURI, String algName) {
-            if (algName.equalsIgnoreCase("DSA") &&
-                    algURI.equalsIgnoreCase("http://www.w3.org/2009/xmldsig11#dsa-sha256")) {
-                return true;
+        private PublicKey findPublicKey(XMLStructure keyInfoItem) {
+            if (keyInfoItem instanceof KeyValue keyValue) {
+                return findPublicKeyFromKeyValue(keyValue);
+            } else if (keyInfoItem instanceof X509Data x509Data) {
+                return findPublicKeyInX509Data(x509Data);
             } else {
-                return algName.equalsIgnoreCase("RSA") &&
-                        algURI.equalsIgnoreCase("http://www.w3.org/2001/04/xmldsig-more#rsa-sha256");
+                return null;
             }
         }
 
-        private KeySelectorResult result(PublicKey publicKey) {
-            return () -> publicKey;
+        private PublicKey findPublicKeyFromKeyValue(KeyValue keyValue) {
+            try {
+                return keyValue.getPublicKey();
+            } catch (KeyException e) {
+                throw new IllegalStateException(e);
+            }
+        }
+
+        private PublicKey findPublicKeyInX509Data(X509Data x509Data) {
+            List<?> x509DataContent = x509Data.getContent();
+            for (Object x509Item : x509DataContent) {
+                if (x509Item instanceof Certificate certificate) {
+                    return certificate.getPublicKey();
+                }
+            }
+            return null;
+        }
+
+        private String algorithmNameToUri(String name) {
+            return switch (name.toLowerCase()) {
+                case "dsa" -> "http://www.w3.org/2009/xmldsig11#dsa-sha256";
+                case "rsa" -> "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256";
+                default -> throw new IllegalArgumentException("Unknown alg name " + name);
+            };
         }
     }
 
