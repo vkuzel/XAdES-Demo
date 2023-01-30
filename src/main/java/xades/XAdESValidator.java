@@ -6,6 +6,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import javax.xml.crypto.*;
+import javax.xml.crypto.dsig.Reference;
 import javax.xml.crypto.dsig.XMLSignature;
 import javax.xml.crypto.dsig.XMLSignatureException;
 import javax.xml.crypto.dsig.XMLSignatureFactory;
@@ -16,38 +17,44 @@ import javax.xml.crypto.dsig.keyinfo.X509Data;
 import java.security.KeyException;
 import java.security.PublicKey;
 import java.security.cert.Certificate;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
+import static javax.xml.crypto.dsig.XMLSignature.XMLNS;
 
 public class XAdESValidator {
 
     public void validate(Document document) throws XAdESValidationException {
-        // When document is deserialized from an XML file, the SignerProperties
-        // element ID attribute is not properly marked, which means reference
-        // URL to the signed properties does not work. Manual marking it, fixes
-        // the issue.
-        markSignerPropertiesId(document);
-
-        NodeList nodeListSignature = document.getElementsByTagNameNS(XMLSignature.XMLNS, "Signature");
-        if (nodeListSignature.getLength() == 0) throw new XAdESValidationException("No signature found!");
-
-        DOMValidateContext domValidateContext = new DOMValidateContext(new KeyValueKeySelector(), nodeListSignature.item(0));
-
-        XMLSignatureFactory xmlSignatureFactory = XMLSignatureFactory.getInstance("DOM");
-
-        XMLSignature xmlSignature;
         try {
-            xmlSignature = xmlSignatureFactory.unmarshalXMLSignature(domValidateContext);
-        } catch (MarshalException e) {
-            throw new IllegalStateException(e);
-        }
+            // When document is deserialized from an XML file, the SignerProperties
+            // element ID attribute is not properly marked, which means reference
+            // URL to the signed properties does not work. Manual marking it, fixes
+            // the issue.
+            markSignerPropertiesId(document);
 
-        try {
-            if (!xmlSignature.validate(domValidateContext)) {
-                throw new XAdESValidationException("Signature is invalid!");
+            NodeList signatureNodes = document.getElementsByTagNameNS(XMLNS, "Signature");
+            if (signatureNodes.getLength() != 1) throw new XAdESValidationException("Cannot retrieve signature!");
+            Node signatureNode = signatureNodes.item(0);
+
+            // Create a DOMValidateContext and specify a KeyValue KeySelector
+            // and document context
+            DOMValidateContext validateContext = new DOMValidateContext(new KeyValueKeySelector(), signatureNode);
+
+            // Create a DOM XMLSignatureFactory that will be used to unmarshal the
+            // document containing the XMLSignature
+            XMLSignatureFactory xmlSignatureFactory = XMLSignatureFactory.getInstance("DOM");
+
+            XMLSignature signature = xmlSignatureFactory.unmarshalXMLSignature(validateContext);
+
+            // Validate XMLSignature
+            if (!signature.validate(validateContext)) {
+                String msg = createXMLDSigValidationErrorMessage(validateContext, signature);
+                throw new XAdESValidationException(msg);
             }
-        } catch (XMLSignatureException e) {
+        } catch (MarshalException | XMLSignatureException e) {
             throw new XAdESValidationException(e);
         }
     }
@@ -61,6 +68,27 @@ public class XAdESValidator {
                 element.setIdAttribute("Id", true);
             }
         }
+    }
+
+    private String createXMLDSigValidationErrorMessage(
+            DOMValidateContext validateContext,
+            XMLSignature signature
+    ) throws XMLSignatureException {
+        Map<String, Boolean> components = new LinkedHashMap<>();
+
+        boolean signatureValidity = signature.getSignatureValue().validate(validateContext);
+        components.put("signature", signatureValidity);
+
+        for (Reference reference : signature.getSignedInfo().getReferences()) {
+            String referenceUri = reference.getURI();
+            boolean referenceValidity = reference.validate(validateContext);
+            String name = "reference[uri=%s]".formatted(referenceUri);
+            components.put(name, referenceValidity);
+        }
+
+        return components.entrySet().stream()
+                .map(e -> "%s validity: %b".formatted(e.getKey(), e.getValue()))
+                .collect(Collectors.joining("\n"));
     }
 
     private static class KeyValueKeySelector extends KeySelector {
