@@ -12,8 +12,10 @@ import javax.xml.crypto.dsig.keyinfo.X509Data;
 import java.security.KeyException;
 import java.security.PublicKey;
 import java.security.cert.Certificate;
-import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class XMLDSigValidator {
 
@@ -31,32 +33,45 @@ public class XMLDSigValidator {
 
             // Create a DOMValidateContext and specify a KeyValue KeySelector
             // and document context
-            DOMValidateContext valContext = new DOMValidateContext(new KeyValueKeySelector(), nl.item(0));
+            DOMValidateContext validateContext = new DOMValidateContext(new KeyValueKeySelector(), nl.item(0));
 
             // unmarshal the XMLSignature
-            XMLSignature signature = fac.unmarshalXMLSignature(valContext);
+            XMLSignature signature = fac.unmarshalXMLSignature(validateContext);
 
             // Validate the generated XMLSignature
-            boolean coreValidity = signature.validate(valContext);
+            boolean coreValidity = signature.validate(validateContext);
 
             // Check core validation status
             if (!coreValidity) {
-                StringBuilder builder = new StringBuilder("Signature failed core validation\n");
-                boolean sv = signature.getSignatureValue().validate(valContext);
-                builder.append("* signature validation status: ").append(sv).append('\n');
-                // check the validation status of each Reference
-                Iterator<Reference> i = signature.getSignedInfo().getReferences().iterator();
-                for (int j = 0; i.hasNext(); j++) {
-                    boolean refValid = i.next().validate(valContext);
-                    builder.append("* ref[").append(j).append("] validity status: ").append(refValid).append('\n');
-                }
-                throw new XMLDSigValidationException(builder.toString());
+                String msg = createXMLDSigValidationErrorMessage(validateContext, signature);
+                throw new XMLDSigValidationException(msg);
             } else {
                 System.out.println("Signature passed core validation");
             }
         } catch (MarshalException | XMLSignatureException e) {
             throw new XMLDSigValidationException(e);
         }
+    }
+
+    private String createXMLDSigValidationErrorMessage(
+            DOMValidateContext validateContext,
+            XMLSignature signature
+    ) throws XMLSignatureException {
+        Map<String, Boolean> components = new LinkedHashMap<>();
+
+        boolean signatureValidity = signature.getSignatureValue().validate(validateContext);
+        components.put("signature", signatureValidity);
+
+        for (Reference reference : signature.getSignedInfo().getReferences()) {
+            String referenceUri = reference.getURI();
+            boolean referenceValidity = reference.validate(validateContext);
+            String name = "reference[uri=%s]".formatted(referenceUri);
+            components.put(name, referenceValidity);
+        }
+
+        return components.entrySet().stream()
+                .map(e -> "%s validity: %b".formatted(e.getKey(), e.getValue()))
+                .collect(Collectors.joining("\n"));
     }
 
     /**
