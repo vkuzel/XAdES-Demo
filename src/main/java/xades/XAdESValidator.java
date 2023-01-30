@@ -95,7 +95,7 @@ public class XAdESValidator {
 
         public KeySelectorResult select(
                 KeyInfo keyInfo,
-                KeySelector.Purpose purpose,
+                Purpose purpose,
                 AlgorithmMethod method,
                 XMLCryptoContext context
         ) throws KeySelectorException {
