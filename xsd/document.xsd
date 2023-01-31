@@ -33,25 +33,4 @@ namespace" error occurs.
             <xs:element ref="ds:Signature"/>
         </xs:sequence>
     </xs:complexType>
-
-    <!--
-    A custom `id` attribute used to reference signed data. This attribute is
-    not part of the XAdES specification, rather it's up to a user to define
-    a custom attribute if needs be.
-
-    The `<ds:Reference URI="#id">` attribute the points to the element which
-    is going to be signed.
-
-    The `URI=""` attribute may be empty. In that case the document containing
-    the signature is used for signature calculation.
-
-    More on that: https://www.w3.org/TR/2002/REC-xmldsig-core-20020212/#sec-URI
-    -->
-    <xs:attribute name="id">
-        <xs:simpleType>
-            <xs:restriction base="xs:ID">
-                <xs:pattern value="signedData"/>
-            </xs:restriction>
-        </xs:simpleType>
-    </xs:attribute>
 </xs:schema>
