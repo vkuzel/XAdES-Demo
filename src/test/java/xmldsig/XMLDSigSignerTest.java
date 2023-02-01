@@ -8,7 +8,8 @@ import javax.xml.bind.JAXBElement;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 
-import static document.DocumentTransformer.*;
+import static document.DocumentTransformer.fromDocument;
+import static document.DocumentTransformer.toPrettyString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static utils.DocumentFactory.*;
@@ -22,7 +23,7 @@ class XMLDSigSignerTest {
         Certificate certificate = getCertificate();
         PrivateKey privateKey = getPrivateKey();
         XMLDSigSigner signer = new XMLDSigSigner(certificate, privateKey);
-        Document document = toDocument(createJaxbElementToSign());
+        Document document = createDocumentToSign();
         System.out.printf("*** Document before signing:%n%s%n%n", toPrettyString(document));
 
         Document signed = signer.signEnveloped(document);

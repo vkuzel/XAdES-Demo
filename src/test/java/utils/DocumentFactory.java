@@ -29,7 +29,7 @@ public class DocumentFactory {
         return toDocument(createJaxbElementToSign());
     }
 
-    public static JAXBElement<DocumentToSign> createJaxbElementToSign() {
+    private static JAXBElement<DocumentToSign> createJaxbElementToSign() {
         ObjectFactory objectFactory = new ObjectFactory();
         DocumentToSign document = objectFactory.createDocumentToSign();
         document.setNumericArgument(NUMERIC_VALUE);
