@@ -71,6 +71,7 @@ public class XAdESRoundTripTest {
         System.out.printf("*** Document after signing:%n%s%n%n", toPrettyString(signed));
         JAXBElement<DocumentToSign> jaxbElement = DocumentTransformer.fromDocument(signed, DocumentToSign.class);
         Document signedTransformed = toDocument(jaxbElement);
+        System.out.printf("*** Document after transformation:%n%s%n%n", toPrettyString(signedTransformed));
 
         validator.validate(signedTransformed);
     }
