@@ -26,16 +26,13 @@ public class DocumentFactory {
     public static final XMLGregorianCalendar TIME_VALUE = xmlGregorianCalendar("2000-01-01T01:01:01Z");
 
     public static Document createDocumentToSign() {
-        return toDocument(createJaxbElementToSign());
-    }
-
-    private static JAXBElement<DocumentToSign> createJaxbElementToSign() {
         ObjectFactory objectFactory = new ObjectFactory();
         DocumentToSign document = objectFactory.createDocumentToSign();
         document.setNumericArgument(NUMERIC_VALUE);
         document.setStringArgument(STRING_VALUE);
         document.setTimeArgument(TIME_VALUE);
-        return objectFactory.createDocToSign(document);
+        JAXBElement<DocumentToSign> docToSign = objectFactory.createDocToSign(document);
+        return toDocument(docToSign);
     }
 
     public static Document createXmlDigSignedDocument() {
