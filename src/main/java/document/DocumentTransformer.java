@@ -2,6 +2,7 @@ package document;
 
 import https.vkuzel_com.xades_demo.DocumentToSign;
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
 import javax.xml.bind.*;
@@ -26,29 +27,29 @@ import static javax.xml.transform.OutputKeys.INDENT;
 @SuppressWarnings("unused")
 public class DocumentTransformer {
 
-    public static String toString(Document document) {
-        return new String(toBytes(document), UTF_8);
+    public static String toString(Node node) {
+        return new String(toBytes(node), UTF_8);
     }
 
-    public static String toPrettyString(Document document) {
+    public static String toPrettyString(Node node) {
         try {
             Transformer transformer = TransformerFactory.newDefaultInstance().newTransformer();
             transformer.setOutputProperty(INDENT, "yes");
             transformer.setOutputProperty("{https://xml.apache.org/xslt}indent-amount", "2");
 
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            transformer.transform(new DOMSource(document), new StreamResult(outputStream));
+            transformer.transform(new DOMSource(node), new StreamResult(outputStream));
             return outputStream.toString(UTF_8);
         } catch (TransformerException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public static byte[] toBytes(Document document) {
+    public static byte[] toBytes(Node node) {
         try {
             Transformer transformer = TransformerFactory.newDefaultInstance().newTransformer();
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            transformer.transform(new DOMSource(document), new StreamResult(outputStream));
+            transformer.transform(new DOMSource(node), new StreamResult(outputStream));
             return outputStream.toByteArray();
         } catch (TransformerException e) {
             throw new RuntimeException(e);
@@ -99,11 +100,11 @@ public class DocumentTransformer {
         }
     }
 
-    public static <T> JAXBElement<T> fromDocument(Document document, Class<T> type) {
+    public static <T> JAXBElement<T> fromDocument(Node node, Class<T> type) {
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(DocumentToSign.class);
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-            return unmarshaller.unmarshal(document, type);
+            return unmarshaller.unmarshal(node, type);
         } catch (JAXBException e) {
             throw new RuntimeException(e);
         }
