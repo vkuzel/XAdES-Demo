@@ -1,8 +1,18 @@
 package xades;
 
+import org.etsi.uri._01903.v1_3.ObjectFactory;
+import org.etsi.uri._01903.v1_3.QualifyingPropertiesType;
+import org.etsi.uri._01903.v1_3.SignedPropertiesType;
+import org.etsi.uri._01903.v1_3.SignedSignaturePropertiesType;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 import javax.xml.crypto.MarshalException;
 import javax.xml.crypto.dom.DOMStructure;
 import javax.xml.crypto.dsig.*;
@@ -14,11 +24,16 @@ import javax.xml.crypto.dsig.spec.C14NMethodParameterSpec;
 import javax.xml.crypto.dsig.spec.DigestMethodParameterSpec;
 import javax.xml.crypto.dsig.spec.SignatureMethodParameterSpec;
 import javax.xml.crypto.dsig.spec.TransformParameterSpec;
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.XMLGregorianCalendar;
+import javax.xml.transform.dom.DOMResult;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.UUID;
 
@@ -57,7 +72,8 @@ public class XAdESSigner {
 
             SignedInfo signedInfo = createSignedInfo(signedPropertiesId);
             KeyInfo keyInfo = createKeyInfo();
-            XMLObject qualifyingProperties = createQualifyingProperties(document, signedPropertiesId, signatureId);
+            // XMLObject qualifyingProperties = createQualifyingProperties(document, signedPropertiesId, signatureId);
+            XMLObject qualifyingProperties = createQualifyingPropertiesTypeSafely(document, signedPropertiesId, signatureId);
 
             XMLSignature xmlSignature = xmlSignatureFactory.newXMLSignature(signedInfo, keyInfo, List.of(qualifyingProperties), signatureId, null);
 
@@ -127,6 +143,7 @@ public class XAdESSigner {
         return keyInfoFactory.newKeyInfo(List.of(x509Data));
     }
 
+    @SuppressWarnings("unused")
     private XMLObject createQualifyingProperties(Document document, String signedPropertiesId, String signatureId) {
         Element qualifyingPropertiesElement = createQualifyingPropertiesAttrs(document, signedPropertiesId, signatureId);
         DOMStructure qualifyingPropertiesObject = new DOMStructure(qualifyingPropertiesElement);
@@ -151,6 +168,74 @@ public class XAdESSigner {
         signedSignaturePropertiesElement.appendChild(signingTimeElement);
 
         return qualifyingPropertiesElement;
+    }
+
+    private XMLObject createQualifyingPropertiesTypeSafely(Document document, String signedPropertiesId, String signatureId) {
+        ObjectFactory objectFactory = new ObjectFactory();
+
+        SignedSignaturePropertiesType signedSignaturePropertiesType = objectFactory.createSignedSignaturePropertiesType();
+        signedSignaturePropertiesType.setSigningTime(currentTime());
+
+        SignedPropertiesType signedPropertiesType = objectFactory.createSignedPropertiesType();
+        signedPropertiesType.setId(signedPropertiesId);
+        signedPropertiesType.setSignedSignatureProperties(signedSignaturePropertiesType);
+
+        QualifyingPropertiesType qualifyingPropertiesType = objectFactory.createQualifyingPropertiesType();
+        qualifyingPropertiesType.setTarget("#" + signatureId);
+        qualifyingPropertiesType.setSignedProperties(signedPropertiesType);
+
+        JAXBElement<QualifyingPropertiesType> qualifyingProperties = objectFactory.createQualifyingProperties(qualifyingPropertiesType);
+        Element qualifyingPropertiesElement = marshall(qualifyingProperties);
+
+        document.adoptNode(qualifyingPropertiesElement);
+
+        // When adopting element into another document, xs:id attributes
+        // lose their id flag. This leads to "Cannot resolve element with
+        // ID" error.
+        //
+        // To prevent this we mark the id attribute manually.
+        //
+        // Explained: https://stackoverflow.com/questions/17331187/xml-dig-sig-error-after-upgrade-to-java7u25
+        NodeList signedProperties = qualifyingPropertiesElement.getElementsByTagName("SignedProperties");
+        for (int i = 0; i < signedProperties.getLength(); i++) {
+            Node item = signedProperties.item(i);
+            if (item instanceof Element element) {
+                element.setIdAttribute("Id", true);
+            }
+        }
+
+        // If the owner document of the DOMStructure is different than the target document of an XMLSignature,
+        // the XMLSignature.sign(XMLSignContext) method imports the node into the target document before
+        // generating the signature.
+        DOMStructure qualifyingPropertiesObject = new DOMStructure(qualifyingPropertiesElement);
+        return xmlSignatureFactory.newXMLObject(singletonList(qualifyingPropertiesObject), null, null, null);
+    }
+
+    private XMLGregorianCalendar currentTime() {
+        try {
+            GregorianCalendar gregorianCalendar = GregorianCalendar.from(now());
+            return DatatypeFactory.newInstance().newXMLGregorianCalendar(gregorianCalendar);
+        } catch (DatatypeConfigurationException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private Element marshall(JAXBElement<QualifyingPropertiesType> qualifyingProperties) {
+        try {
+            JAXBContext jaxbContext = JAXBContext.newInstance(QualifyingPropertiesType.class);
+            Marshaller marshaller = jaxbContext.createMarshaller();
+
+            DOMResult domResult = new DOMResult();
+            marshaller.marshal(qualifyingProperties, domResult);
+            Node node = domResult.getNode();
+            if (node instanceof Document qualifyingPropertiesDocument) {
+                return qualifyingPropertiesDocument.getDocumentElement();
+            } else {
+                throw new IllegalStateException("Node " + node + " is not document!");
+            }
+        } catch (JAXBException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private DOMSignContext createDomSignContext(Document document) {
