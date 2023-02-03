@@ -58,11 +58,10 @@ public class DocumentTransformer {
 
     public static Document toDocument(JAXBElement<?> jaxbElement) {
         try {
+            Marshaller marshaller = createMarshaller();
+
             DocumentBuilder documentBuilder = createDocumentBuilder();
             Document document = documentBuilder.newDocument();
-
-            JAXBContext jaxbContext = JAXBContext.newInstance(DocumentToSign.class);
-            Marshaller marshaller = jaxbContext.createMarshaller();
             marshaller.marshal(jaxbElement, document);
             return document;
         } catch (JAXBException e) {
@@ -76,8 +75,7 @@ public class DocumentTransformer {
 
     public static byte[] toBytes(JAXBElement<?> jaxbElement) {
         try {
-            JAXBContext jaxbContext = JAXBContext.newInstance(DocumentToSign.class);
-            Marshaller marshaller = jaxbContext.createMarshaller();
+            Marshaller marshaller = createMarshaller();
 
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             marshaller.marshal(jaxbElement, outputStream);
@@ -102,8 +100,7 @@ public class DocumentTransformer {
 
     public static <T> JAXBElement<T> fromDocument(Node node, Class<T> type) {
         try {
-            JAXBContext jaxbContext = JAXBContext.newInstance(DocumentToSign.class);
-            Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+            Unmarshaller unmarshaller = createUnmarshaller();
             return unmarshaller.unmarshal(node, type);
         } catch (JAXBException e) {
             throw new RuntimeException(e);
@@ -117,8 +114,7 @@ public class DocumentTransformer {
     public static <T> JAXBElement<T> fromBytes(byte[] content, Class<T> type) {
         try (InputStream inputStream = new ByteArrayInputStream(content)) {
             Source source = new StreamSource(inputStream);
-            JAXBContext jaxbContext = JAXBContext.newInstance(DocumentToSign.class);
-            Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+            Unmarshaller unmarshaller = createUnmarshaller();
             return unmarshaller.unmarshal(source, type);
         } catch (JAXBException | IOException e) {
             throw new RuntimeException(e);
@@ -133,5 +129,15 @@ public class DocumentTransformer {
         } catch (ParserConfigurationException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static Marshaller createMarshaller() throws JAXBException {
+        JAXBContext jaxbContext = JAXBContext.newInstance(DocumentToSign.class);
+        return jaxbContext.createMarshaller();
+    }
+
+    private static Unmarshaller createUnmarshaller() throws JAXBException {
+        JAXBContext jaxbContext = JAXBContext.newInstance(DocumentToSign.class);
+        return jaxbContext.createUnmarshaller();
     }
 }
