@@ -1,9 +1,6 @@
 package xades;
 
-import org.etsi.uri._01903.v1_3.ObjectFactory;
-import org.etsi.uri._01903.v1_3.QualifyingPropertiesType;
-import org.etsi.uri._01903.v1_3.SignedPropertiesType;
-import org.etsi.uri._01903.v1_3.SignedSignaturePropertiesType;
+import org.etsi.uri._01903.v1_3.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -173,8 +170,15 @@ public class XAdESSigner {
     private XMLObject createQualifyingPropertiesTypeSafely(Document document, String signedPropertiesId, String signatureId) {
         ObjectFactory objectFactory = new ObjectFactory();
 
+        // Usually the signature policy identifier points to a particular
+        // policy. Alternatively, the empty "implied element" can be used to
+        // state policy can be derived from semantics of the document.
+        SignaturePolicyIdentifierType signaturePolicyIdentifierType = objectFactory.createSignaturePolicyIdentifierType();
+        signaturePolicyIdentifierType.setSignaturePolicyImplied("");
+
         SignedSignaturePropertiesType signedSignaturePropertiesType = objectFactory.createSignedSignaturePropertiesType();
         signedSignaturePropertiesType.setSigningTime(currentTime());
+        signedSignaturePropertiesType.setSignaturePolicyIdentifier(signaturePolicyIdentifierType);
 
         SignedPropertiesType signedPropertiesType = objectFactory.createSignedPropertiesType();
         signedPropertiesType.setId(signedPropertiesId);
