@@ -65,7 +65,7 @@ public class XAdESSigner {
     public Document signEnveloped(Document document) {
         try {
             String signatureId = "signature-" + UUID.randomUUID();
-            String signedPropertiesId = "sp-" + UUID.randomUUID();
+            String signedPropertiesId = "signature-properties-" + UUID.randomUUID();
 
             SignedInfo signedInfo = createSignedInfo(signedPropertiesId);
             KeyInfo keyInfo = createKeyInfo();
