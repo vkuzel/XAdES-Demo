@@ -32,6 +32,7 @@ import java.security.cert.X509Certificate;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 import static java.time.ZonedDateTime.now;
 import static java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME;
@@ -218,12 +219,7 @@ public class XAdESSigner {
         //
         // Explained: https://stackoverflow.com/questions/17331187/xml-dig-sig-error-after-upgrade-to-java7u25
         NodeList signedProperties = qualifyingPropertiesElement.getElementsByTagName("SignedProperties");
-        for (int i = 0; i < signedProperties.getLength(); i++) {
-            Node item = signedProperties.item(i);
-            if (item instanceof Element element) {
-                element.setIdAttribute("Id", true);
-            }
-        }
+        forEachElement(signedProperties, (element) -> element.setIdAttribute("Id", true));
 
         // If the owner document of the DOMStructure is different than the target document of an XMLSignature,
         // the XMLSignature.sign(XMLSignContext) method imports the node into the target document before
@@ -239,33 +235,6 @@ public class XAdESSigner {
             messageDigest.update(der);
             return messageDigest.digest();
         } catch (CertificateEncodingException | NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private XMLGregorianCalendar currentTime() {
-        try {
-            GregorianCalendar gregorianCalendar = GregorianCalendar.from(now());
-            return DatatypeFactory.newInstance().newXMLGregorianCalendar(gregorianCalendar);
-        } catch (DatatypeConfigurationException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private Element marshall(JAXBElement<QualifyingPropertiesType> qualifyingProperties) {
-        try {
-            JAXBContext jaxbContext = JAXBContext.newInstance(QualifyingPropertiesType.class);
-            Marshaller marshaller = jaxbContext.createMarshaller();
-
-            DOMResult domResult = new DOMResult();
-            marshaller.marshal(qualifyingProperties, domResult);
-            Node node = domResult.getNode();
-            if (node instanceof Document qualifyingPropertiesDocument) {
-                return qualifyingPropertiesDocument.getDocumentElement();
-            } else {
-                throw new IllegalStateException("Node " + node + " is not document!");
-            }
-        } catch (JAXBException e) {
             throw new RuntimeException(e);
         }
     }
@@ -291,11 +260,47 @@ public class XAdESSigner {
         return domSignContext;
     }
 
-    private XMLSignatureFactory signatureFactory() {
+    private static XMLSignatureFactory signatureFactory() {
         try {
             return XMLSignatureFactory.getInstance("DOM", "XMLDSig");
         } catch (NoSuchProviderException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private static XMLGregorianCalendar currentTime() {
+        try {
+            GregorianCalendar gregorianCalendar = GregorianCalendar.from(now());
+            return DatatypeFactory.newInstance().newXMLGregorianCalendar(gregorianCalendar);
+        } catch (DatatypeConfigurationException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static Element marshall(JAXBElement<QualifyingPropertiesType> qualifyingProperties) {
+        try {
+            JAXBContext jaxbContext = JAXBContext.newInstance(QualifyingPropertiesType.class);
+            Marshaller marshaller = jaxbContext.createMarshaller();
+
+            DOMResult domResult = new DOMResult();
+            marshaller.marshal(qualifyingProperties, domResult);
+            Node node = domResult.getNode();
+            if (node instanceof Document qualifyingPropertiesDocument) {
+                return qualifyingPropertiesDocument.getDocumentElement();
+            } else {
+                throw new IllegalStateException("Node " + node + " is not document!");
+            }
+        } catch (JAXBException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static void forEachElement(NodeList nodeList, Consumer<Element> consumer) {
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            Node item = nodeList.item(i);
+            if (item instanceof Element element) {
+                consumer.accept(element);
+            }
         }
     }
 }
