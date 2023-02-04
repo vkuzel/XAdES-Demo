@@ -7,7 +7,7 @@
 This demo application shows:
 
 1. Signed document definition (XSD) with embedded signature element in `xsd/document.xsd`.
-2. `xjc` generated transport objects. From which a `Document` for signing is prepared.
+2. `xjc` generated transport objects. From which a `Document` for signing is prepared. E.g. `xjc-generate-classes.sh`
 3. XMLDSig signing and validation in the `XMLDSIGRoundTripTest`
 4. XAdES signing and validation in the `XAdESRoundTripTest`
 
@@ -43,7 +43,7 @@ This demo application shows:
                 <ns2:DigestValue>99XoijRJvFYlc/340OJDwK8kv9LnmD2xkCtcbyP96M8=</ns2:DigestValue>
             </ns2:Reference>
         </ns2:SignedInfo>
-        <ns2:SignatureValu>lo4vdHDqEx2nWrIBxViOWyUpCynGBYSV3VPh...</ns2:SignatureValu>
+        <ns2:SignatureValue>lo4vdHDqEx2nWrIBxViOWyUpCynGBYSV3VPh...</ns2:SignatureValue>
         <ns2:KeyInfo>
             <ns2:X509Data>
                 <ns2:X509Certificate>MIIDRTCCAi2gAwIBAgIEQjgraj...</ns2:X509Certificate>
@@ -56,6 +56,57 @@ This demo application shows:
 ## XAdES signed document
 
 ```xml
-<!-- TODO Add correct XAdES signed document -->
-<docToSign/>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<docToSign xmlns="https://vkuzel.com/xades-demo" xmlns:ns2="http://www.w3.org/2000/09/xmldsig#">
+    <numericArgument>1</numericArgument>
+    <stringArgument>string-value</stringArgument>
+    <timeArgument>2000-01-01T01:01:01.000Z</timeArgument>
+    <ns2:Signature Id="signature-3c8cde91-c052-4abe-a7f9-6c3f71f3a1d4">
+        <ns2:SignedInfo>
+            <ns2:CanonicalizationMethod Algorithm="http://www.w3.org/2006/12/xml-c14n11#WithComments"/>
+            <ns2:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>
+            <ns2:Reference URI=""><!-- Same reference to the signed document as in XMLDSig --></ns2:Reference>
+            <!-- Reference to the signed properties. Reason for signed 
+            properties and in general existence of XAdES is that signle public
+            key can be used in multiple certificates. XMLDSig does not ensure
+            the certificate was not changed in the signed document (remember
+            KeyInfo element is not digested -> signed).
+             
+            The SignedSignatureProperties element contains certificate identifier. -->
+            <ns2:Reference URI="#signed-properties-704f3271-b681-4f35-a8f5-e3c03590d5d7">
+                <ns2:Transforms>
+                    <ns2:Transform Algorithm="http://www.w3.org/2006/12/xml-c14n11#WithComments"/>
+                </ns2:Transforms>
+                <ns2:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+                <ns2:DigestValue>1YsOF7DZSzBJsARfGBdC9aJMOMJtqLUDdXkqzJJPczI=</ns2:DigestValue>
+            </ns2:Reference>
+        </ns2:SignedInfo>
+        <ns2:SignatureValue><!-- Same as in XMLDSig --></ns2:SignatureValue>
+        <ns2:KeyInfo><!-- Same as in XMLDSig --></ns2:KeyInfo>
+        <ns2:Object>
+            <QualifyingProperties xmlns="http://uri.etsi.org/01903/v1.3.2#" Target="#signature-3c8cde91-c052-4abe-a7f9-6c3f71f3a1d4">
+                <SignedProperties Id="signed-properties-704f3271-b681-4f35-a8f5-e3c03590d5d7">
+                    <SignedSignatureProperties>
+                        <SigningTime>2023-02-04T11:22:09.796+01:00</SigningTime>
+                        <SigningCertificate>
+                            <Cert>
+                                <CertDigest>
+                                    <ns2:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+                                    <ns2:DigestValue>2vrrQh8AIWiSe56oTEm5...</ns2:DigestValue>
+                                </CertDigest>
+                                <IssuerSerial>
+                                    <ns2:X509IssuerName>CN=XAdES Demo</ns2:X509IssuerName>
+                                    <ns2:X509SerialNumber>15248582071077365500</ns2:X509SerialNumber>
+                                </IssuerSerial>
+                            </Cert>
+                        </SigningCertificate>
+                        <SignaturePolicyIdentifier>
+                            <SignaturePolicyImplied xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xs:string"/>
+                        </SignaturePolicyIdentifier>
+                    </SignedSignatureProperties>
+                </SignedProperties>
+            </QualifyingProperties>
+        </ns2:Object>
+    </ns2:Signature>
+</docToSign>
 ```
