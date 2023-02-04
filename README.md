@@ -1,13 +1,17 @@
 # XML Signature & XAdES Demo
 
-[**XML signature (XMLDSig)**](http://www.w3.org/TR/2002/REC-xmldsig-core-20020212/) defines a syntax for signing documents. In short, a `<Signature>` element containing signed document digest, signature of the digest and some additional information about the signed document or signature itself.
+[**XML signature (XMLDSig)**](http://www.w3.org/TR/2002/REC-xmldsig-core-20020212/) defines a syntax for signing XML documents.
 
-[**XAdES**](https://www.w3.org/TR/XAdES/) extends XMLDSig into the domain of non-repudiation. Meaning, the signer cannot later deny signing the document. XAdES syntax is mostly used for commerce in the European Union.
+In short, a digest (hash) is calculated from normalized (canonicalized) version of a document, the digest is signed and signature details are placed into the `<Signature>` element. The signature element is then placed (enveloped) into the signed document.
+
+The XMLDSig does not sign the signing certificate itself. Because single public key can be used in multiple certificates, there is a risk that certificate may be replaced in the signed document.
+
+This issue (among others) is solved by [**XAdES**](https://www.w3.org/TR/XAdES/) which extends XMLDSig and adds signed information about the signing certificate into the extensible  XMLDSig's `<Object>` element.
 
 This demo application shows:
 
-1. Signed document definition (XSD) with embedded signature element in `xsd/document.xsd`.
-2. `xjc` generated transport objects. From which a `Document` for signing is prepared. E.g. `xjc-generate-classes.sh`
+1. Document definition (XSD) for a document to be sign. With enveloped signature element in `xsd/document.xsd`.
+2. `xjc` generated DTOs. From which a `Document` for signing is prepared. E.g. `xjc-generate-classes.sh`
 3. XMLDSig signing and validation in the `XMLDSIGRoundTripTest`
 4. XAdES signing and validation in the `XAdESRoundTripTest`
 
