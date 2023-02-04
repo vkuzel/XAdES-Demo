@@ -7,6 +7,7 @@ import org.w3._2000._09.xmldsig_.ObjectType;
 import org.w3._2000._09.xmldsig_.ReferenceType;
 import org.w3._2000._09.xmldsig_.SignedInfoType;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import javax.xml.bind.JAXBElement;
 import java.security.PrivateKey;
@@ -57,5 +58,10 @@ public class XAdESSignerTest {
         List<ObjectType> objects = signedDocument.getSignature().getObject();
         assertNotNull(objects);
         assertEquals(1, objects.size());
+        assertEquals(1, objects.get(0).getContent().size());
+        Element qualifyingPropertiesElement = (Element) objects.get(0).getContent().get(0);
+        assertEquals(1, qualifyingPropertiesElement.getElementsByTagName("SigningTime").getLength());
+        assertEquals(1, qualifyingPropertiesElement.getElementsByTagName("SigningCertificate").getLength());
+        assertEquals(1, qualifyingPropertiesElement.getElementsByTagName("SignaturePolicyIdentifier").getLength());
     }
 }
