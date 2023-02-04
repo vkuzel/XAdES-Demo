@@ -13,7 +13,7 @@ public class KeyFactory {
 
     public static X509Certificate getCertificate() {
         try {
-            Certificate certificate = keyStore.getCertificate("selfsigned");
+            Certificate certificate = keyStore.getCertificate("test-cert");
             if (certificate instanceof X509Certificate x509Certificate) {
                 return x509Certificate;
             }
@@ -25,7 +25,7 @@ public class KeyFactory {
 
     public static PrivateKey getPrivateKey() {
         try {
-            Key key = keyStore.getKey("selfsigned", "password".toCharArray());
+            Key key = keyStore.getKey("test-cert", "password".toCharArray());
             if (key instanceof PrivateKey privateKey) {
                 return privateKey;
             }
@@ -36,7 +36,7 @@ public class KeyFactory {
     }
 
     private static KeyStore loadKeyStore() {
-        try (InputStream keyStoreStream = KeyFactory.class.getResourceAsStream("/keystore.jks")) {
+        try (InputStream keyStoreStream = KeyFactory.class.getResourceAsStream("/test-keystore.jks")) {
             KeyStore keyStore = KeyStore.getInstance("JKS");
             keyStore.load(keyStoreStream, "password".toCharArray());
             return keyStore;
