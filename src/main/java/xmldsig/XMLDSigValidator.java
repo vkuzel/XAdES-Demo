@@ -23,6 +23,13 @@ import java.util.stream.Collectors;
 
 import static javax.xml.crypto.dsig.XMLSignature.XMLNS;
 
+/**
+ * Be aware, this validator checks signature of a document against certificate
+ * in the signature itself.
+ * <p>
+ * It does not check whether provided certificate is trusted, expired, revoked,
+ * etc. This check has to be implemented in yet, or done separately.
+ */
 public class XMLDSigValidator {
 
     public void validate(Document document) throws XMLDSigValidationException {
