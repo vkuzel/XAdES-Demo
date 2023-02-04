@@ -10,7 +10,7 @@ import org.w3c.dom.Document;
 
 import javax.xml.bind.JAXBElement;
 import java.security.PrivateKey;
-import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
 import java.util.List;
 
 import static document.DocumentTransformer.fromDocument;
@@ -25,7 +25,7 @@ public class XAdESSignerTest {
 
     @Test
     void signEnveloped() {
-        Certificate certificate = getCertificate();
+        X509Certificate certificate = getCertificate();
         PrivateKey privateKey = getPrivateKey();
         XAdESSigner signer = new XAdESSigner(certificate, privateKey);
         Document document = createDocumentToSign();

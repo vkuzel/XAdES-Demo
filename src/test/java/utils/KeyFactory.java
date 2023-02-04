@@ -5,14 +5,19 @@ import java.io.InputStream;
 import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 
 public class KeyFactory {
 
     private static final KeyStore keyStore = loadKeyStore();
 
-    public static Certificate getCertificate() {
+    public static X509Certificate getCertificate() {
         try {
-            return keyStore.getCertificate("selfsigned");
+            Certificate certificate = keyStore.getCertificate("selfsigned");
+            if (certificate instanceof X509Certificate x509Certificate) {
+                return x509Certificate;
+            }
+            throw new IllegalArgumentException("X509Certificate not found!");
         } catch (KeyStoreException e) {
             throw new RuntimeException(e);
         }

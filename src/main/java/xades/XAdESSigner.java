@@ -27,7 +27,6 @@ import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.transform.dom.DOMResult;
 import java.security.*;
-import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.GregorianCalendar;
@@ -52,11 +51,11 @@ public class XAdESSigner {
     private static final SignatureMethodParameterSpec EMPTY_SIGN_PARAMS = null;
     private static final TransformParameterSpec EMPTY_TRANSFORM_PARAMS = null;
 
-    private final Certificate certificate;
+    private final X509Certificate certificate;
     private final PrivateKey privateKey;
     private final XMLSignatureFactory xmlSignatureFactory;
 
-    public XAdESSigner(Certificate certificate, PrivateKey privateKey) {
+    public XAdESSigner(X509Certificate certificate, PrivateKey privateKey) {
         this.certificate = certificate;
         this.privateKey = privateKey;
         this.xmlSignatureFactory = signatureFactory();
@@ -169,9 +168,7 @@ public class XAdESSigner {
 
     private XMLObject createQualifyingPropertiesTypeSafely(Document document, String signedPropertiesId, String signatureId) {
         ObjectFactory objectFactory = new ObjectFactory();
-
         org.w3._2000._09.xmldsig_.ObjectFactory xmldSigFactory = new org.w3._2000._09.xmldsig_.ObjectFactory();
-        X509Certificate x509Certificate = (X509Certificate) certificate;
 
         DigestAlgAndValueType certificateDigest = objectFactory.createDigestAlgAndValueType();
         certificateDigest.setDigestValue(calculateCertificateSha256Digest());
@@ -179,8 +176,8 @@ public class XAdESSigner {
         certificateDigest.getDigestMethod().setAlgorithm("http://www.w3.org/2001/04/xmlenc#sha256");
 
         X509IssuerSerialType x509IssuerSerialType = xmldSigFactory.createX509IssuerSerialType();
-        x509IssuerSerialType.setX509IssuerName(x509Certificate.getIssuerX500Principal().getName());
-        x509IssuerSerialType.setX509SerialNumber(x509Certificate.getSerialNumber());
+        x509IssuerSerialType.setX509IssuerName(certificate.getIssuerX500Principal().getName());
+        x509IssuerSerialType.setX509SerialNumber(certificate.getSerialNumber());
 
         CertIDType signingCertificate = objectFactory.createCertIDType();
         signingCertificate.setCertDigest(certificateDigest);

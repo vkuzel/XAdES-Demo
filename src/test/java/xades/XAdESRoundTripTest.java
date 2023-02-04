@@ -7,7 +7,7 @@ import org.w3c.dom.Document;
 
 import javax.xml.bind.JAXBElement;
 import java.security.PrivateKey;
-import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
 
 import static document.DocumentTransformer.*;
 import static utils.DocumentFactory.createDocumentToSign;
@@ -16,7 +16,7 @@ import static utils.KeyFactory.getPrivateKey;
 
 public class XAdESRoundTripTest {
 
-    private final Certificate certificate = getCertificate();
+    private final X509Certificate certificate = getCertificate();
     private final PrivateKey privateKey = getPrivateKey();
     private final XAdESSigner signer = new XAdESSigner(certificate, privateKey);
     private final XAdESValidator validator = new XAdESValidator();
