@@ -31,8 +31,8 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
-import java.util.function.Consumer;
 
 import static java.time.ZonedDateTime.now;
 import static java.util.Collections.singletonList;
@@ -197,8 +197,7 @@ public class XAdESSigner {
         // To prevent this we mark the id attribute manually.
         //
         // Explained: https://stackoverflow.com/questions/17331187/xml-dig-sig-error-after-upgrade-to-java7u25
-        NodeList signedProperties = qualifyingPropertiesElement.getElementsByTagName("SignedProperties");
-        forEachElement(signedProperties, (element) -> element.setIdAttribute("Id", true));
+        markIdsRecursively(qualifyingPropertiesElement.getChildNodes());
 
         // If the owner document of the DOMStructure is different than the target document of an XMLSignature,
         // the XMLSignature.sign(XMLSignContext) method imports the node into the target document before
@@ -274,12 +273,17 @@ public class XAdESSigner {
         }
     }
 
-    private static void forEachElement(NodeList nodeList, Consumer<Element> consumer) {
+    private static void markIdsRecursively(NodeList nodeList) {
         for (int i = 0; i < nodeList.getLength(); i++) {
             Node item = nodeList.item(i);
             if (item instanceof Element element) {
-                consumer.accept(element);
+                for (String idAttributeName : Set.of("id", "Id", "ID")) {
+                    if (element.hasAttribute(idAttributeName)) {
+                        element.setIdAttribute(idAttributeName, true);
+                    }
+                }
             }
+            markIdsRecursively(item.getChildNodes());
         }
     }
 }
