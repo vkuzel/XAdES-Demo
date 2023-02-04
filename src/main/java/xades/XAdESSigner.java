@@ -167,10 +167,10 @@ public class XAdESSigner {
     }
 
     private XMLObject createQualifyingPropertiesTypeSafely(Document document, String signedPropertiesId, String signatureId) {
-        ObjectFactory objectFactory = new ObjectFactory();
+        ObjectFactory xadesFactory = new ObjectFactory();
         org.w3._2000._09.xmldsig_.ObjectFactory xmldSigFactory = new org.w3._2000._09.xmldsig_.ObjectFactory();
 
-        DigestAlgAndValueType certificateDigest = objectFactory.createDigestAlgAndValueType();
+        DigestAlgAndValueType certificateDigest = xadesFactory.createDigestAlgAndValueType();
         certificateDigest.setDigestValue(calculateCertificateSha256Digest());
         certificateDigest.setDigestMethod(xmldSigFactory.createDigestMethodType());
         certificateDigest.getDigestMethod().setAlgorithm("http://www.w3.org/2001/04/xmlenc#sha256");
@@ -179,33 +179,33 @@ public class XAdESSigner {
         x509IssuerSerialType.setX509IssuerName(certificate.getIssuerX500Principal().getName());
         x509IssuerSerialType.setX509SerialNumber(certificate.getSerialNumber());
 
-        CertIDType signingCertificate = objectFactory.createCertIDType();
+        CertIDType signingCertificate = xadesFactory.createCertIDType();
         signingCertificate.setCertDigest(certificateDigest);
         signingCertificate.setIssuerSerial(x509IssuerSerialType);
 
-        CertIDListType signingCertificates = objectFactory.createCertIDListType();
+        CertIDListType signingCertificates = xadesFactory.createCertIDListType();
         signingCertificates.getCert().add(signingCertificate);
 
         // Usually the signature policy identifier points to a particular
         // policy. Alternatively, the empty "implied element" can be used to
         // state policy can be derived from semantics of the document.
-        SignaturePolicyIdentifierType signaturePolicyIdentifierType = objectFactory.createSignaturePolicyIdentifierType();
+        SignaturePolicyIdentifierType signaturePolicyIdentifierType = xadesFactory.createSignaturePolicyIdentifierType();
         signaturePolicyIdentifierType.setSignaturePolicyImplied("");
 
-        SignedSignaturePropertiesType signedSignaturePropertiesType = objectFactory.createSignedSignaturePropertiesType();
+        SignedSignaturePropertiesType signedSignaturePropertiesType = xadesFactory.createSignedSignaturePropertiesType();
         signedSignaturePropertiesType.setSigningTime(currentTime());
         signedSignaturePropertiesType.setSigningCertificate(signingCertificates);
         signedSignaturePropertiesType.setSignaturePolicyIdentifier(signaturePolicyIdentifierType);
 
-        SignedPropertiesType signedPropertiesType = objectFactory.createSignedPropertiesType();
+        SignedPropertiesType signedPropertiesType = xadesFactory.createSignedPropertiesType();
         signedPropertiesType.setId(signedPropertiesId);
         signedPropertiesType.setSignedSignatureProperties(signedSignaturePropertiesType);
 
-        QualifyingPropertiesType qualifyingPropertiesType = objectFactory.createQualifyingPropertiesType();
+        QualifyingPropertiesType qualifyingPropertiesType = xadesFactory.createQualifyingPropertiesType();
         qualifyingPropertiesType.setTarget("#" + signatureId);
         qualifyingPropertiesType.setSignedProperties(signedPropertiesType);
 
-        JAXBElement<QualifyingPropertiesType> qualifyingProperties = objectFactory.createQualifyingProperties(qualifyingPropertiesType);
+        JAXBElement<QualifyingPropertiesType> qualifyingProperties = xadesFactory.createQualifyingProperties(qualifyingPropertiesType);
         Element qualifyingPropertiesElement = marshall(qualifyingProperties);
 
         document.adoptNode(qualifyingPropertiesElement);
