@@ -1,6 +1,7 @@
 package xades;
 
 import org.etsi.uri._01903.v1_3.*;
+import org.w3._2000._09.xmldsig_.X509IssuerSerialType;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -25,11 +26,10 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.transform.dom.DOMResult;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
+import java.security.*;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.UUID;
@@ -170,6 +170,25 @@ public class XAdESSigner {
     private XMLObject createQualifyingPropertiesTypeSafely(Document document, String signedPropertiesId, String signatureId) {
         ObjectFactory objectFactory = new ObjectFactory();
 
+        org.w3._2000._09.xmldsig_.ObjectFactory xmldSigFactory = new org.w3._2000._09.xmldsig_.ObjectFactory();
+        X509Certificate x509Certificate = (X509Certificate) certificate;
+
+        DigestAlgAndValueType certificateDigest = objectFactory.createDigestAlgAndValueType();
+        certificateDigest.setDigestValue(calculateCertificateSha256Digest());
+        certificateDigest.setDigestMethod(xmldSigFactory.createDigestMethodType());
+        certificateDigest.getDigestMethod().setAlgorithm("http://www.w3.org/2001/04/xmlenc#sha256");
+
+        X509IssuerSerialType x509IssuerSerialType = xmldSigFactory.createX509IssuerSerialType();
+        x509IssuerSerialType.setX509IssuerName(x509Certificate.getIssuerX500Principal().getName());
+        x509IssuerSerialType.setX509SerialNumber(x509Certificate.getSerialNumber());
+
+        CertIDType signingCertificate = objectFactory.createCertIDType();
+        signingCertificate.setCertDigest(certificateDigest);
+        signingCertificate.setIssuerSerial(x509IssuerSerialType);
+
+        CertIDListType signingCertificates = objectFactory.createCertIDListType();
+        signingCertificates.getCert().add(signingCertificate);
+
         // Usually the signature policy identifier points to a particular
         // policy. Alternatively, the empty "implied element" can be used to
         // state policy can be derived from semantics of the document.
@@ -178,6 +197,7 @@ public class XAdESSigner {
 
         SignedSignaturePropertiesType signedSignaturePropertiesType = objectFactory.createSignedSignaturePropertiesType();
         signedSignaturePropertiesType.setSigningTime(currentTime());
+        signedSignaturePropertiesType.setSigningCertificate(signingCertificates);
         signedSignaturePropertiesType.setSignaturePolicyIdentifier(signaturePolicyIdentifierType);
 
         SignedPropertiesType signedPropertiesType = objectFactory.createSignedPropertiesType();
@@ -213,6 +233,17 @@ public class XAdESSigner {
         // generating the signature.
         DOMStructure qualifyingPropertiesObject = new DOMStructure(qualifyingPropertiesElement);
         return xmlSignatureFactory.newXMLObject(singletonList(qualifyingPropertiesObject), null, null, null);
+    }
+
+    private byte[] calculateCertificateSha256Digest() {
+        try {
+            MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
+            byte[] der = certificate.getEncoded();
+            messageDigest.update(der);
+            return messageDigest.digest();
+        } catch (CertificateEncodingException | NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private XMLGregorianCalendar currentTime() {
