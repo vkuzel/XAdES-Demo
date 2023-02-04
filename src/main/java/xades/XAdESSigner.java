@@ -35,7 +35,6 @@ import java.util.UUID;
 import java.util.function.Consumer;
 
 import static java.time.ZonedDateTime.now;
-import static java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 import static java.util.Collections.singletonList;
 
 public class XAdESSigner {
@@ -69,8 +68,7 @@ public class XAdESSigner {
 
             SignedInfo signedInfo = createSignedInfo(signedPropertiesId);
             KeyInfo keyInfo = createKeyInfo();
-            // XMLObject qualifyingProperties = createQualifyingProperties(document, signedPropertiesId, signatureId);
-            XMLObject qualifyingProperties = createQualifyingPropertiesTypeSafely(document, signedPropertiesId, signatureId);
+            XMLObject qualifyingProperties = createQualifyingProperties(document, signedPropertiesId, signatureId);
 
             XMLSignature xmlSignature = xmlSignatureFactory.newXMLSignature(signedInfo, keyInfo, List.of(qualifyingProperties), signatureId, null);
 
@@ -140,34 +138,15 @@ public class XAdESSigner {
         return keyInfoFactory.newKeyInfo(List.of(x509Data));
     }
 
-    @SuppressWarnings("unused")
+    /**
+     * The method creates type safely qualifying properties using DTOs
+     * generated from XAdES schema. Structure then has to be marshalled and
+     * adopted into the signing document.
+     * <p>
+     * Alternative approach would be to create properties structure
+     * manually via `document.createElement()` methods.
+     */
     private XMLObject createQualifyingProperties(Document document, String signedPropertiesId, String signatureId) {
-        Element qualifyingPropertiesElement = createQualifyingPropertiesAttrs(document, signedPropertiesId, signatureId);
-        DOMStructure qualifyingPropertiesObject = new DOMStructure(qualifyingPropertiesElement);
-        return xmlSignatureFactory.newXMLObject(singletonList(qualifyingPropertiesObject), null, null, null);
-    }
-
-    private Element createQualifyingPropertiesAttrs(Document document, String signedPropertiesId, String signatureId) {
-        String signingTime = ISO_OFFSET_DATE_TIME.format(now());
-
-        Element qualifyingPropertiesElement = document.createElement("QualifyingProperties");
-        qualifyingPropertiesElement.setAttribute("Target", "#" + signatureId);
-
-        Element signedPropertiesElement = document.createElement("SignedProperties");
-        signedPropertiesElement.setAttribute("Id", signedPropertiesId);
-        signedPropertiesElement.setIdAttribute("Id", true);
-        Element signedSignaturePropertiesElement = document.createElement("SignedSignatureProperties");
-        Element signingTimeElement = document.createElement("SigningTime");
-        signingTimeElement.setTextContent(signingTime);
-
-        qualifyingPropertiesElement.appendChild(signedPropertiesElement);
-        signedPropertiesElement.appendChild(signedSignaturePropertiesElement);
-        signedSignaturePropertiesElement.appendChild(signingTimeElement);
-
-        return qualifyingPropertiesElement;
-    }
-
-    private XMLObject createQualifyingPropertiesTypeSafely(Document document, String signedPropertiesId, String signatureId) {
         ObjectFactory xadesFactory = new ObjectFactory();
         org.w3._2000._09.xmldsig_.ObjectFactory xmldSigFactory = new org.w3._2000._09.xmldsig_.ObjectFactory();
 
