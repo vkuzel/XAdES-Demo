@@ -47,6 +47,10 @@ public class DocumentFactory {
         return loadDocumentFromResource("/xades/signed-document.xml");
     }
 
+    public static Document createXadesSignedChangedDocument() {
+        return loadDocumentFromResource("/xades/signed-changed-document.xml");
+    }
+
     private static Document loadDocumentFromResource(String name) {
         try (InputStream inputStream = DocumentFactory.class.getResourceAsStream(name)) {
             byte[] content = requireNonNull(inputStream).readAllBytes();

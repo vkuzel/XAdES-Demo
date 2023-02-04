@@ -1,5 +1,6 @@
 package xmldsig;
 
+import document.DocumentTransformer;
 import https.vkuzel_com.xades_demo.DocumentToSign;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
@@ -28,7 +29,7 @@ class XMLDSigSignerTest {
 
         Document signed = signer.signEnveloped(document);
 
-        System.out.printf("*** Document after signing:%n%s%n%n", toPrettyString(signed));
+        System.out.printf("*** Document after signing:%n%s%n%n", DocumentTransformer.toString(signed));
         JAXBElement<DocumentToSign> signedJaxbElement = fromDocument(signed, DocumentToSign.class);
         assertNotNull(signedJaxbElement.getValue());
         DocumentToSign signedDocument = signedJaxbElement.getValue();
