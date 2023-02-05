@@ -100,11 +100,7 @@ public class XMLDSigValidator {
             for (XMLStructure keyInfoItem : keyInfo.getContent()) {
                 PublicKey publicKey = findPublicKey(keyInfoItem);
                 if (publicKey == null) continue;
-                String publicKeyAlgoUri = algorithmNameToUri(publicKey.getAlgorithm());
-                String methodAlgoUri = method.getAlgorithm();
-                if (publicKeyAlgoUri.equalsIgnoreCase(methodAlgoUri)) {
-                    return () -> publicKey;
-                }
+                return () -> publicKey;
             }
 
             throw new KeySelectorException("No KeyValue element found!");
@@ -136,14 +132,6 @@ public class XMLDSigValidator {
                 }
             }
             return null;
-        }
-
-        private String algorithmNameToUri(String name) {
-            return switch (name.toLowerCase()) {
-                case "dsa" -> "http://www.w3.org/2009/xmldsig11#dsa-sha256";
-                case "rsa" -> "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256";
-                default -> throw new IllegalArgumentException("Unknown alg name " + name);
-            };
         }
     }
 
