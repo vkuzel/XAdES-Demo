@@ -23,11 +23,11 @@ import java.util.List;
 public class XMLDSigSigner {
 
     // Removes "enveloped signature" from a document, so the signature element itself is not digested
-    private static final String TRANSFORM_ALGORITHM = "http://www.w3.org/2000/09/xmldsig#enveloped-signature";
+    private static final String ENVELOPED_SIGNATURE_TRANSFORM_ALGORITHM = "http://www.w3.org/2000/09/xmldsig#enveloped-signature";
     // Canonicals (normalizes) a document. Preserves comments. E.g. removes line feeds, normalizes attributes, CDATA, etc.
-    private static final String CANONICALIZATION_ALGORITHM = "http://www.w3.org/2006/12/xml-c14n11#WithComments";
-    private static final String DIGEST_ALGORITHM = "http://www.w3.org/2001/04/xmlenc#sha256";
-    private static final String SIGN_ALGORITHM = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256";
+    private static final String C14N_CANONICALIZATION_ALGORITHM = "http://www.w3.org/2006/12/xml-c14n11#WithComments";
+    private static final String SHA256_DIGEST_ALGORITHM = "http://www.w3.org/2001/04/xmlenc#sha256";
+    private static final String RSA_SHA512_SIGN_ALGORITHM = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha512";
 
     private static final C14NMethodParameterSpec EMPTY_C14N_PARAMS = null;
     private static final DigestMethodParameterSpec EMPTY_DIGEST_PARAMS = null;
@@ -80,16 +80,16 @@ public class XMLDSigSigner {
     }
 
     private static SignedInfo createSignedInfo(XMLSignatureFactory xmlSignatureFactory) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
-        CanonicalizationMethod c14nMethod = xmlSignatureFactory.newCanonicalizationMethod(CANONICALIZATION_ALGORITHM, EMPTY_C14N_PARAMS);
-        DigestMethod digestMethod = xmlSignatureFactory.newDigestMethod(DIGEST_ALGORITHM, EMPTY_DIGEST_PARAMS);
-        SignatureMethod signMethod = xmlSignatureFactory.newSignatureMethod(SIGN_ALGORITHM, EMPTY_SIGN_PARAMS);
+        CanonicalizationMethod c14nMethod = xmlSignatureFactory.newCanonicalizationMethod(C14N_CANONICALIZATION_ALGORITHM, EMPTY_C14N_PARAMS);
+        DigestMethod digestMethod = xmlSignatureFactory.newDigestMethod(SHA256_DIGEST_ALGORITHM, EMPTY_DIGEST_PARAMS);
+        SignatureMethod signMethod = xmlSignatureFactory.newSignatureMethod(RSA_SHA512_SIGN_ALGORITHM, EMPTY_SIGN_PARAMS);
 
         // Before calculating digest (hash) the document is transformed into
         // its canonical (normalized) form so the digest is consistent even
         // if document is reformatted, etc.
         List<Transform> transforms = List.of(
-                xmlSignatureFactory.newTransform(TRANSFORM_ALGORITHM, EMPTY_TRANSFORM_PARAMS),
-                xmlSignatureFactory.newTransform(CANONICALIZATION_ALGORITHM, EMPTY_TRANSFORM_PARAMS)
+                xmlSignatureFactory.newTransform(ENVELOPED_SIGNATURE_TRANSFORM_ALGORITHM, EMPTY_TRANSFORM_PARAMS),
+                xmlSignatureFactory.newTransform(C14N_CANONICALIZATION_ALGORITHM, EMPTY_TRANSFORM_PARAMS)
         );
 
         // Empty URI points to the root element. Otherwise, the URI would have to point to a signed element.

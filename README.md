@@ -30,7 +30,7 @@ This demo application shows:
     <ns2:Signature>
         <ns2:SignedInfo>
             <ns2:CanonicalizationMethod Algorithm="http://www.w3.org/2006/12/xml-c14n11#WithComments"/>
-            <ns2:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>
+            <ns2:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha512"/>
             <!-- Reference to the signed document. Empty URI attribute points
              to the root element of the current document. -->
             <ns2:Reference URI="">
@@ -68,7 +68,7 @@ This demo application shows:
     <ns2:Signature Id="signature-3c8cde91-c052-4abe-a7f9-6c3f71f3a1d4">
         <ns2:SignedInfo>
             <ns2:CanonicalizationMethod Algorithm="http://www.w3.org/2006/12/xml-c14n11#WithComments"/>
-            <ns2:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>
+            <ns2:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha512"/>
             <ns2:Reference URI=""><!-- Same reference to the signed document as in XMLDSig --></ns2:Reference>
             <!-- Reference to the signed properties. Reason for signed 
             properties and in general existence of XAdES is that signle public

@@ -44,7 +44,7 @@ public class XAdESSigner {
     // Canonicals (normalizes) a document. Preserves comments. E.g. removes line feeds, normalizes attributes, CDATA, etc.
     private static final String C14N_CANONICALIZATION_ALGORITHM = "http://www.w3.org/2006/12/xml-c14n11#WithComments";
     private static final String SHA256_DIGEST_ALGORITHM = "http://www.w3.org/2001/04/xmlenc#sha256";
-    private static final String RSA_SHA256_SIGN_ALGORITHM = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256";
+    private static final String RSA_SHA512_SIGN_ALGORITHM = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha512";
 
     private static final C14NMethodParameterSpec EMPTY_C14N_PARAMS = null;
     private static final DigestMethodParameterSpec EMPTY_DIGEST_PARAMS = null;
@@ -84,7 +84,7 @@ public class XAdESSigner {
 
     private SignedInfo createSignedInfo(String signedPropertiesId) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
         CanonicalizationMethod c14nMethod = xmlSignatureFactory.newCanonicalizationMethod(C14N_CANONICALIZATION_ALGORITHM, EMPTY_C14N_PARAMS);
-        SignatureMethod signMethod = xmlSignatureFactory.newSignatureMethod(RSA_SHA256_SIGN_ALGORITHM, EMPTY_SIGN_PARAMS);
+        SignatureMethod signMethod = xmlSignatureFactory.newSignatureMethod(RSA_SHA512_SIGN_ALGORITHM, EMPTY_SIGN_PARAMS);
 
         List<Reference> references = List.of(
                 createSignedDocumentReference(),
@@ -153,7 +153,7 @@ public class XAdESSigner {
         DigestAlgAndValueType certificateDigest = xadesFactory.createDigestAlgAndValueType();
         certificateDigest.setDigestValue(calculateCertificateSha256Digest());
         certificateDigest.setDigestMethod(xmldSigFactory.createDigestMethodType());
-        certificateDigest.getDigestMethod().setAlgorithm("http://www.w3.org/2001/04/xmlenc#sha256");
+        certificateDigest.getDigestMethod().setAlgorithm(SHA256_DIGEST_ALGORITHM);
 
         X509IssuerSerialType x509IssuerSerialType = xmldSigFactory.createX509IssuerSerialType();
         x509IssuerSerialType.setX509IssuerName(certificate.getIssuerX500Principal().getName());
