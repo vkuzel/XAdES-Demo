@@ -20,7 +20,7 @@ This demo application shows:
 ```xml
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!-- Signed document -->
-<docToSign xmlns="https://vkuzel.com/xades-demo" xmlns:ns2="http://www.w3.org/2000/09/xmldsig#">
+<docToSign xmlns="https://github.com/vkuzel/XAdES-Demo" xmlns:ns2="http://www.w3.org/2000/09/xmldsig#">
     <!-- Content of the signed document -->
     <numericArgument>1</numericArgument>
     <stringArgument>string-value</stringArgument>
@@ -61,7 +61,7 @@ This demo application shows:
 
 ```xml
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<docToSign xmlns="https://vkuzel.com/xades-demo" xmlns:ns2="http://www.w3.org/2000/09/xmldsig#">
+<docToSign xmlns="https://github.com/vkuzel/XAdES-Demo" xmlns:ns2="http://www.w3.org/2000/09/xmldsig#">
     <numericArgument>1</numericArgument>
     <stringArgument>string-value</stringArgument>
     <timeArgument>2000-01-01T01:01:01.000Z</timeArgument>

@@ -1,7 +1,7 @@
 package utils;
 
-import https.vkuzel_com.xades_demo.DocumentToSign;
-import https.vkuzel_com.xades_demo.ObjectFactory;
+import https.github_com.vkuzel.xades_demo.DocumentToSign;
+import https.github_com.vkuzel.xades_demo.ObjectFactory;
 import org.w3c.dom.Document;
 
 import javax.xml.bind.JAXBElement;

@@ -1,7 +1,7 @@
 package xmldsig;
 
 import document.DocumentTransformer;
-import https.vkuzel_com.xades_demo.DocumentToSign;
+import https.github_com.vkuzel.xades_demo.DocumentToSign;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import xmldsig.XMLDSigValidator.XMLDSigValidationException;

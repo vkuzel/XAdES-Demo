@@ -1,6 +1,6 @@
 package xades;
 
-import https.vkuzel_com.xades_demo.DocumentToSign;
+import https.github_com.vkuzel.xades_demo.DocumentToSign;
 import org.junit.jupiter.api.Test;
 import org.w3._2000._09.xmldsig_.KeyInfoType;
 import org.w3._2000._09.xmldsig_.ObjectType;

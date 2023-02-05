@@ -1,6 +1,6 @@
 package document;
 
-import https.vkuzel_com.xades_demo.DocumentToSign;
+import https.github_com.vkuzel.xades_demo.DocumentToSign;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
