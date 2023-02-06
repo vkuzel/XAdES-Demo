@@ -1,6 +1,7 @@
 package xades;
 
-import https.github_com.vkuzel.xades_demo.DocumentToSign;
+import document.DocumentTransformer;
+import https.github_com.vkuzel.xades_demo.SingableDocumentType;
 import org.junit.jupiter.api.Test;
 import org.w3._2000._09.xmldsig_.KeyInfoType;
 import org.w3._2000._09.xmldsig_.ObjectType;
@@ -18,7 +19,8 @@ import static document.DocumentTransformer.fromDocument;
 import static document.DocumentTransformer.toPrettyString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static utils.DocumentFactory.*;
+import static utils.DocumentFactory.SOME_VALUE;
+import static utils.DocumentFactory.createDocumentToSign;
 import static utils.KeyFactory.getCertificate;
 import static utils.KeyFactory.getPrivateKey;
 
@@ -34,17 +36,15 @@ public class XAdESSignerTest {
 
         Document signed = signer.signEnveloped(document);
 
-        System.out.printf("*** Document after signing:%n%s%n%n", toPrettyString(signed));
-        JAXBElement<DocumentToSign> signedJaxbElement = fromDocument(signed, DocumentToSign.class);
+        System.out.printf("*** Document after signing:%n%s%n%n", DocumentTransformer.toString(signed));
+        JAXBElement<SingableDocumentType> signedJaxbElement = fromDocument(signed, SingableDocumentType.class);
         assertNotNull(signedJaxbElement.getValue());
-        DocumentToSign signedDocument = signedJaxbElement.getValue();
-        assertEquals(NUMERIC_VALUE, signedDocument.getNumericArgument());
-        assertEquals(STRING_VALUE, signedDocument.getStringArgument());
-        assertEquals(TIME_VALUE, signedDocument.getTimeArgument());
+        SingableDocumentType singableDocument = signedJaxbElement.getValue();
+        assertEquals(SOME_VALUE, singableDocument.getSomeElement());
         // <Signature>
-        assertNotNull(signedDocument.getSignature());
+        assertNotNull(singableDocument.getSignature());
         // <SignedInfo>
-        SignedInfoType signedInfo = signedDocument.getSignature().getSignedInfo();
+        SignedInfoType signedInfo = singableDocument.getSignature().getSignedInfo();
         assertNotNull(signedInfo);
         assertEquals(2, signedInfo.getReference().size());
         ReferenceType signedDocumentReference = signedInfo.getReference().get(0);
@@ -52,10 +52,10 @@ public class XAdESSignerTest {
         ReferenceType qualifyingPropertiesReference = signedInfo.getReference().get(1);
         assertNotNull(qualifyingPropertiesReference.getDigestValue());
         // <KeyInfo>
-        KeyInfoType keyInfo = signedDocument.getSignature().getKeyInfo();
+        KeyInfoType keyInfo = singableDocument.getSignature().getKeyInfo();
         assertNotNull(keyInfo);
         // <Object>
-        List<ObjectType> objects = signedDocument.getSignature().getObject();
+        List<ObjectType> objects = singableDocument.getSignature().getObject();
         assertNotNull(objects);
         assertEquals(1, objects.size());
         assertEquals(1, objects.get(0).getContent().size());

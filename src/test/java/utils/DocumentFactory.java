@@ -1,7 +1,7 @@
 package utils;
 
-import https.github_com.vkuzel.xades_demo.DocumentToSign;
 import https.github_com.vkuzel.xades_demo.ObjectFactory;
+import https.github_com.vkuzel.xades_demo.SingableDocumentType;
 import org.w3c.dom.Document;
 
 import javax.xml.bind.JAXBElement;
@@ -22,16 +22,14 @@ import static java.util.Objects.requireNonNull;
 public class DocumentFactory {
 
     public static final BigInteger NUMERIC_VALUE = ONE;
-    public static final String STRING_VALUE = "string-value";
+    public static final String SOME_VALUE = "some-value";
     public static final XMLGregorianCalendar TIME_VALUE = xmlGregorianCalendar("2000-01-01T01:01:01Z");
 
     public static Document createDocumentToSign() {
         ObjectFactory objectFactory = new ObjectFactory();
-        DocumentToSign document = objectFactory.createDocumentToSign();
-        document.setNumericArgument(NUMERIC_VALUE);
-        document.setStringArgument(STRING_VALUE);
-        document.setTimeArgument(TIME_VALUE);
-        JAXBElement<DocumentToSign> docToSign = objectFactory.createDocToSign(document);
+        SingableDocumentType signableDocument = objectFactory.createSingableDocumentType();
+        signableDocument.setSomeElement(SOME_VALUE);
+        JAXBElement<SingableDocumentType> docToSign = objectFactory.createSingableDocument(signableDocument);
         return toDocument(docToSign);
     }
 

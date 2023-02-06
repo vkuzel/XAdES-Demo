@@ -1,7 +1,7 @@
 package xades;
 
 import document.DocumentTransformer;
-import https.github_com.vkuzel.xades_demo.DocumentToSign;
+import https.github_com.vkuzel.xades_demo.SingableDocumentType;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 
@@ -69,7 +69,7 @@ public class XAdESRoundTripTest {
         Document signed = signer.signEnveloped(document);
 
         System.out.printf("*** Document after signing:%n%s%n%n", toPrettyString(signed));
-        JAXBElement<DocumentToSign> jaxbElement = DocumentTransformer.fromDocument(signed, DocumentToSign.class);
+        JAXBElement<SingableDocumentType> jaxbElement = DocumentTransformer.fromDocument(signed, SingableDocumentType.class);
         Document signedTransformed = toDocument(jaxbElement);
         System.out.printf("*** Document after transformation:%n%s%n%n", toPrettyString(signedTransformed));
 

@@ -6,28 +6,29 @@
 //
 
 
-package org.etsi.uri._01903.v1_3;
+package https.github_com.vkuzel.xades_demo;
 
 import org.w3._2000._09.xmldsig_.SignatureType;
 
-import javax.xml.bind.annotation.*;
-import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for CounterSignatureType complex type.
+ * <p>Java class for SingableDocumentType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="CounterSignatureType">
+ * &lt;complexType name="SingableDocumentType">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
+ *         &lt;element name="someElement" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element ref="{http://www.w3.org/2000/09/xmldsig#}Signature"/>
  *       &lt;/sequence>
- *       &lt;attribute name="Id" type="{http://www.w3.org/2001/XMLSchema}ID" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -36,18 +37,39 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "CounterSignatureType", propOrder = {
+@XmlType(name = "SingableDocumentType", propOrder = {
+    "someElement",
     "signature"
 })
-public class CounterSignatureType {
+public class SingableDocumentType {
 
+    protected String someElement;
     @XmlElement(name = "Signature", namespace = "http://www.w3.org/2000/09/xmldsig#", required = true)
     protected SignatureType signature;
-    @XmlAttribute(name = "Id")
-    @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
-    @XmlID
-    @XmlSchemaType(name = "ID")
-    protected String id;
+
+    /**
+     * Gets the value of the someElement property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getSomeElement() {
+        return someElement;
+    }
+
+    /**
+     * Sets the value of the someElement property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setSomeElement(String value) {
+        this.someElement = value;
+    }
 
     /**
      * Gets the value of the signature property.
@@ -71,30 +93,6 @@ public class CounterSignatureType {
      */
     public void setSignature(SignatureType value) {
         this.signature = value;
-    }
-
-    /**
-     * Gets the value of the id property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getId() {
-        return id;
-    }
-
-    /**
-     * Sets the value of the id property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setId(String value) {
-        this.id = value;
     }
 
 }

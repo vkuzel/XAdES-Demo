@@ -1,6 +1,6 @@
 package document;
 
-import https.github_com.vkuzel.xades_demo.DocumentToSign;
+import https.github_com.vkuzel.xades_demo.SingableDocumentType;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
@@ -132,12 +132,12 @@ public class DocumentTransformer {
     }
 
     private static Marshaller createMarshaller() throws JAXBException {
-        JAXBContext jaxbContext = JAXBContext.newInstance(DocumentToSign.class);
+        JAXBContext jaxbContext = JAXBContext.newInstance(SingableDocumentType.class);
         return jaxbContext.createMarshaller();
     }
 
     private static Unmarshaller createUnmarshaller() throws JAXBException {
-        JAXBContext jaxbContext = JAXBContext.newInstance(DocumentToSign.class);
+        JAXBContext jaxbContext = JAXBContext.newInstance(SingableDocumentType.class);
         return jaxbContext.createUnmarshaller();
     }
 }

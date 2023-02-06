@@ -1,6 +1,6 @@
 package xmldsig;
 
-import https.github_com.vkuzel.xades_demo.DocumentToSign;
+import https.github_com.vkuzel.xades_demo.SingableDocumentType;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 
@@ -12,7 +12,8 @@ import static document.DocumentTransformer.fromDocument;
 import static document.DocumentTransformer.toPrettyString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static utils.DocumentFactory.*;
+import static utils.DocumentFactory.SOME_VALUE;
+import static utils.DocumentFactory.createDocumentToSign;
 import static utils.KeyFactory.getCertificate;
 import static utils.KeyFactory.getPrivateKey;
 
@@ -29,12 +30,10 @@ class XMLDSigSignerTest {
         Document signed = signer.signEnveloped(document);
 
         System.out.printf("*** Document after signing:%n%s%n%n", toPrettyString(signed));
-        JAXBElement<DocumentToSign> signedJaxbElement = fromDocument(signed, DocumentToSign.class);
+        JAXBElement<SingableDocumentType> signedJaxbElement = fromDocument(signed, SingableDocumentType.class);
         assertNotNull(signedJaxbElement.getValue());
-        DocumentToSign signedDocument = signedJaxbElement.getValue();
-        assertEquals(NUMERIC_VALUE, signedDocument.getNumericArgument());
-        assertEquals(STRING_VALUE, signedDocument.getStringArgument());
-        assertEquals(TIME_VALUE, signedDocument.getTimeArgument());
+        SingableDocumentType signedDocument = signedJaxbElement.getValue();
+        assertEquals(SOME_VALUE, signedDocument.getSomeElement());
         assertNotNull(signedDocument.getSignature());
         assertNotNull(signedDocument.getSignature().getSignedInfo());
         assertEquals(1, signedDocument.getSignature().getSignedInfo().getReference().size());

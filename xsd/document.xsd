@@ -11,23 +11,13 @@ namespace" error occurs.
            elementFormDefault="qualified">
     <xs:import namespace="http://www.w3.org/2000/09/xmldsig#" schemaLocation="xmldsig.xsd"/>
 
-    <xs:element name="docToSign" type="DocumentToSign"/>
+    <xs:element name="singableDocument" type="SingableDocumentType"/>
 
-    <xs:complexType name="DocumentToSign">
+    <xs:complexType name="SingableDocumentType">
         <xs:sequence>
-            <xs:element name="numericArgument" type="xs:integer">
+            <xs:element name="someElement" type="xs:string" minOccurs="0">
                 <xs:annotation>
-                    <xs:documentation>Mandatory argument holding integer value</xs:documentation>
-                </xs:annotation>
-            </xs:element>
-            <xs:element name="stringArgument" type="xs:string" minOccurs="0">
-                <xs:annotation>
-                    <xs:documentation>Argument holding string value</xs:documentation>
-                </xs:annotation>
-            </xs:element>
-            <xs:element name="timeArgument" type="xs:dateTime" minOccurs="0">
-                <xs:annotation>
-                    <xs:documentation>Some argument holding time value</xs:documentation>
+                    <xs:documentation>Element holding a string value</xs:documentation>
                 </xs:annotation>
             </xs:element>
             <xs:element ref="ds:Signature"/>
