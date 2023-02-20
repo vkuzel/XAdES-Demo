@@ -12,11 +12,8 @@ import javax.xml.crypto.dsig.XMLSignatureException;
 import javax.xml.crypto.dsig.XMLSignatureFactory;
 import javax.xml.crypto.dsig.dom.DOMValidateContext;
 import javax.xml.crypto.dsig.keyinfo.KeyInfo;
-import javax.xml.crypto.dsig.keyinfo.KeyValue;
 import javax.xml.crypto.dsig.keyinfo.X509Data;
-import java.security.KeyException;
-import java.security.PublicKey;
-import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -110,35 +107,25 @@ public class XAdESValidator {
                 throw new KeySelectorException("KeyInfo is null");
             }
 
+            // This algorithm expects X509 certificate to be present in the
+            // KeyInfo element. But that's not always the case, because the
+            // element is optional or may contain just public key.
+            //
+            // The XAdES-X_L form introduces CertificateValues element holding
+            // certificates. In tha case, the certificate may be obtained from
+            // the CertificateValues element.
             for (XMLStructure keyInfoItem : keyInfo.getContent()) {
-                if (keyInfoItem instanceof KeyValue keyValue) {
-                    PublicKey publicKey = getPublicKeyFromKeyValue(keyValue);
-                    return () -> publicKey;
-                } else if (keyInfoItem instanceof X509Data x509Data) {
-                    PublicKey publicKey = findPublicKeyInX509Data(x509Data);
-                    if (publicKey != null) return () -> publicKey;
+                if (keyInfoItem instanceof X509Data x509Data) {
+                    List<?> x509DataContent = x509Data.getContent();
+                    for (Object x509Item : x509DataContent) {
+                        if (x509Item instanceof X509Certificate certificate) {
+                            return certificate::getPublicKey;
+                        }
+                    }
                 }
             }
 
             throw new KeySelectorException("No PublicKey found in key info " + keyInfo);
-        }
-
-        private static PublicKey getPublicKeyFromKeyValue(KeyValue keyValue) {
-            try {
-                return keyValue.getPublicKey();
-            } catch (KeyException e) {
-                throw new IllegalStateException(e);
-            }
-        }
-
-        private static PublicKey findPublicKeyInX509Data(X509Data x509Data) {
-            List<?> x509DataContent = x509Data.getContent();
-            for (Object x509Item : x509DataContent) {
-                if (x509Item instanceof Certificate certificate) {
-                    return certificate.getPublicKey();
-                }
-            }
-            return null;
         }
     }
 
