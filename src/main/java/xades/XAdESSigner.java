@@ -146,7 +146,7 @@ public class XAdESSigner {
      * Alternative approach would be to create properties structure
      * manually via `document.createElement()` methods.
      */
-    private XMLObject createQualifyingProperties(Document document, String signedPropertiesId, String signatureId) {
+    private XMLObject createQualifyingProperties(Document ownerDocument, String signedPropertiesId, String signatureId) {
         ObjectFactory xadesFactory = new ObjectFactory();
         org.w3._2000._09.xmldsig_.ObjectFactory xmldSigFactory = new org.w3._2000._09.xmldsig_.ObjectFactory();
 
@@ -188,21 +188,21 @@ public class XAdESSigner {
         JAXBElement<QualifyingPropertiesType> qualifyingProperties = xadesFactory.createQualifyingProperties(qualifyingPropertiesType);
         Element qualifyingPropertiesElement = marshall(qualifyingProperties);
 
-        document.adoptNode(qualifyingPropertiesElement);
+        Node importedQualifyingProperties = ownerDocument.importNode(qualifyingPropertiesElement, true);
 
-        // When adopting element into another document, xs:id attributes
+        // When importing element into another document, xs:id attributes
         // lose their id flag. This leads to "Cannot resolve element with
         // ID" error.
         //
         // To prevent this we mark the id attribute manually.
         //
         // Explained: https://stackoverflow.com/questions/17331187/xml-dig-sig-error-after-upgrade-to-java7u25
-        markIdsRecursively(qualifyingPropertiesElement.getChildNodes());
+        markIdsRecursively(importedQualifyingProperties.getChildNodes());
 
         // If the owner document of the DOMStructure is different than the target document of an XMLSignature,
         // the XMLSignature.sign(XMLSignContext) method imports the node into the target document before
         // generating the signature.
-        DOMStructure qualifyingPropertiesObject = new DOMStructure(qualifyingPropertiesElement);
+        DOMStructure qualifyingPropertiesObject = new DOMStructure(importedQualifyingProperties);
         return xmlSignatureFactory.newXMLObject(singletonList(qualifyingPropertiesObject), null, null, null);
     }
 
