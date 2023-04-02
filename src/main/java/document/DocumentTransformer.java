@@ -123,8 +123,7 @@ public class DocumentTransformer {
 
     private static DocumentBuilder createDocumentBuilder() {
         try {
-            DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-            documentBuilderFactory.setNamespaceAware(true);
+            DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newDefaultNSInstance();
             return documentBuilderFactory.newDocumentBuilder();
         } catch (ParserConfigurationException e) {
             throw new RuntimeException(e);
