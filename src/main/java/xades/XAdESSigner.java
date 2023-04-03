@@ -188,15 +188,24 @@ public class XAdESSigner {
         JAXBElement<QualifyingPropertiesType> qualifyingProperties = xadesFactory.createQualifyingProperties(qualifyingPropertiesType);
         Element qualifyingPropertiesElement = marshall(qualifyingProperties);
 
-        Node importedQualifyingProperties = ownerDocument.importNode(qualifyingPropertiesElement, true);
-
-        // When importing element into another document, xs:id attributes
-        // lose their id flag. This leads to "Cannot resolve element with
-        // ID" error.
-        //
-        // To prevent this we mark the id attribute manually.
+        // If the qualifying-properties owner document is different to an owner
+        // document of signed-data, then the DOMXMLSignature.marshal() ->
+        // DOMXMLObject.marshal() method will try to adopt the qualifying-properties
+        // element. This adoption removes id flags from attributes leading to
+        // the "Cannot resolve element with ID" error.
         //
         // Explained: https://stackoverflow.com/questions/17331187/xml-dig-sig-error-after-upgrade-to-java7u25
+        //
+        // Also, sometimes the document object is just a wrapper delegating to
+        // a different document object. Different instances of owner-document
+        // objects lead to aforementioned error.
+        //
+        // To mitigate the issues, the qualifying-properties element is imported
+        // into the signed-data owner document.
+        Node importedQualifyingProperties = ownerDocument.importNode(qualifyingPropertiesElement, true);
+
+        // Re-set id flag lost during element import to all xs:id attributes
+        // by setting the `Element.setIdAttribute("Id", true)`.
         markIdsRecursively(importedQualifyingProperties.getChildNodes());
 
         // If the owner document of the DOMStructure is different than the target document of an XMLSignature,
